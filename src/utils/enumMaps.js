@@ -1,0 +1,317 @@
+// Single source of truth for all Google Ads API enum → human-readable label mappings.
+// Values cover both integer proto IDs and their string enum names so the lookup
+// succeeds regardless of which form the API (or google-ads-api library) returns.
+
+export const CAMPAIGN_STATUS = {
+  2: 'Active', 3: 'Paused', 4: 'Removed',
+  'ACTIVE': 'Active', 'PAUSED': 'Paused', 'REMOVED': 'Removed',
+  // Aliases from backend STATUS_MAP
+  'Active': 'Active', 'Paused': 'Paused', 'Removed': 'Removed', 'Limited': 'Limited',
+  'Enabled': 'Enabled',
+}
+
+export const AD_GROUP_STATUS = {
+  2: 'Enabled', 3: 'Paused', 4: 'Removed',
+  'ENABLED': 'Enabled', 'PAUSED': 'Paused', 'REMOVED': 'Removed',
+}
+
+export const AD_TYPE = {
+  2:  'Text Ad',
+  3:  'Expanded Text Ad',
+  6:  'Dynamic Search Ad',
+  8:  'Responsive Display Ad',
+  9:  'Call Only Ad',
+  10: 'Expanded Dynamic Search Ad',
+  11: 'Hotel Ad',
+  12: 'Shopping Smart Ad',
+  13: 'Shopping Product Ad',
+  14: 'Video Ad',
+  15: 'Responsive Search Ad',
+  16: 'Legacy Responsive Display Ad',
+  17: 'App Ad',
+  18: 'Legacy App Install Ad',
+  19: 'Responsive Search Ad',
+  20: 'Local Ad',
+  21: 'HTML5 Ad',
+  22: 'Image Ad',
+  23: 'Shopping Comparison Listing Ad',
+  'RESPONSIVE_SEARCH_AD':         'Responsive Search Ad',
+  'EXPANDED_TEXT_AD':             'Expanded Text Ad',
+  'CALL_ONLY_AD':                 'Call Only Ad',
+  'RESPONSIVE_DISPLAY_AD':        'Responsive Display Ad',
+  'SHOPPING_PRODUCT_AD':          'Shopping Product Ad',
+  'VIDEO_RESPONSIVE_AD':          'Video Ad',
+  'DYNAMIC_SEARCH_AD':            'Dynamic Search Ad',
+  'APP_AD':                       'App Ad',
+  'HOTEL_AD':                     'Hotel Ad',
+  'SMART_SHOPPING_AD':            'Shopping Smart Ad',
+  'UNKNOWN':                      'Unknown',
+  'UNSPECIFIED':                  'Unspecified',
+}
+
+export const NETWORK_TYPE = {
+  // Numeric enum (0=UNSPECIFIED,1=UNKNOWN,2=SEARCH,3=SEARCH_PARTNERS,
+  //   4=CONTENT,5=YOUTUBE_SEARCH,6=YOUTUBE_WATCH,7=MIXED,8=GOOGLE_TV)
+  0:  'Other',
+  1:  'Unknown',
+  2:  'Google Search',
+  3:  'Search Partners',
+  4:  'Google Display Network',
+  5:  'YouTube Search',
+  6:  'YouTube',
+  7:  'Cross-network',
+  8:  'Google TV',
+  // String enum forms
+  'SEARCH':           'Google Search',
+  'SEARCH_PARTNERS':  'Search Partners',
+  'CONTENT':          'Google Display Network',
+  'YOUTUBE_SEARCH':   'YouTube Search',
+  'YOUTUBE_WATCH':    'YouTube',
+  'MIXED':            'Cross-network',
+  'GOOGLE_TV':        'Google TV',
+  'UNKNOWN':          'Unknown',
+  'UNSPECIFIED':      'Other',
+}
+
+export const DEVICE_TYPE = {
+  // Google Ads API Device proto: MOBILE=2, TABLET=3, DESKTOP=4, CONNECTED_TV=5, OTHER=6
+  // Note: Google Ads UI shows OTHER(6) as "TV screens" and CONNECTED_TV(5) as "Other"
+  2: 'Mobile',
+  3: 'Tablet',
+  4: 'Desktop',
+  5: 'Other',       // CONNECTED_TV
+  6: 'TV Screen',   // OTHER — Google Ads UI calls this "TV screens"
+  'MOBILE':        'Mobile',
+  'TABLET':        'Tablet',
+  'DESKTOP':       'Desktop',
+  'CONNECTED_TV':  'Other',
+  'OTHER':         'TV Screen',
+  'UNKNOWN':       'Unknown',
+  'UNSPECIFIED':   'Unknown',
+}
+
+export const CLICK_TYPE = {
+  // ── Numeric enum (0–58) ───────────────────────────────────────────────────
+  // ── Numeric enum (verified against Google Ads UI) ─────────────────────────
+  0:  'Unspecified',
+  1:  'Lead Form Headline Interaction',
+  2:  'Cross-network Clicks',
+  3:  'Breadcrumbs',
+  4:  'Brochure Download',
+  5:  'Call Tracking',
+  6:  'Mobile Clicks-to-Call',
+  7:  'CTA',
+  8:  'Driving Direction',
+  9:  'Get Location Details / Asset Interaction',
+  10: 'Hotel Booking',
+  11: 'Hotel Property',
+  12: 'Maps Pin Clicks',
+  13: 'Location: Call',
+  14: 'Location: Directions',
+  15: 'Image',
+  16: 'Location: Map',
+  17: 'Location: Message',
+  18: 'Location: Website',
+  19: 'Get Location Details',
+  20: 'Click to Message',
+  21: 'Mobile Clicks-to-Call',
+  22: 'Sitelink / Promotion Asset',
+  23: 'Other',
+  24: 'Manually Dialed Phone Calls',
+  25: 'Headline',
+  26: 'Product Extension',
+  27: 'Product Plus Box',
+  28: 'Sitelink',
+  29: 'Store Visits',
+  30: 'Website',
+  31: 'Video App Store',
+  32: 'Video Call to Action',
+  33: 'Video Card Headline',
+  34: 'Video End Cap',
+  35: 'Video Website',
+  36: 'Website Call',
+  37: 'Website Content',
+  38: 'Website Directions',
+  39: 'Website Menu',
+  40: 'Website Mobile Download',
+  41: 'Website Phone Call',
+  42: 'Website Reservations',
+  43: 'Website See Menu',
+  44: 'Website Order',
+  45: 'Website Clicks to Call',
+  46: 'File Download',
+  47: 'Mobile Clicks-to-Call',
+  48: 'Maps: Directions',
+  49: 'Maps: Save',
+  50: 'Maps: Website',
+  51: 'Maps: Call',
+  52: 'Maps: Share Location',
+  53: 'Maps: Other',
+  54: 'Maps: Store Visits',
+  55: 'Maps: Order',
+  56: 'Maps: Book',
+  57: 'Cross-network Clicks',
+  58: 'Image Interaction',
+  // ── String enum values ────────────────────────────────────────────────────
+  'UNSPECIFIED':                        'Unspecified',
+  'UNKNOWN':                            'Unknown',
+  'HEADLINE':                           'Lead Form Headline Interaction',
+  'CROSS_NETWORK':                      'Cross-network Clicks',
+  'BREADCRUMBS':                        'Breadcrumbs',
+  'BROCHURE_DOWNLOAD':                  'Brochure Download',
+  'CALL_TRACKING':                      'Call Tracking',
+  'CONTACTS':                           'Mobile Clicks-to-Call',
+  'CTA':                                'CTA',
+  'DIRECTIONS':                         'Driving Direction',
+  'PRICE':                              'Get Location Details / Asset Interaction',
+  'HOTEL_CENTER_PROPERTY_BOOKING':      'Hotel Booking',
+  'HOTEL_PROPERTY':                     'Hotel Property',
+  'LOCATION_EXPANSION':                 'Maps Pin Clicks',
+  'LOCATION_FORMAT_CALL':               'Location: Call',
+  'LOCATION_FORMAT_DIRECTIONS':         'Location: Directions',
+  'LOCATION_FORMAT_IMAGE':              'Image',
+  'LOCATION_FORMAT_MAP':                'Location: Map',
+  'LOCATION_FORMAT_MESSAGE':            'Location: Message',
+  'LOCATION_FORMAT_WEBSITE':            'Location: Website',
+  'GET_LOCATION_DETAILS':               'Get Location Details',
+  'MESSAGE':                            'Click to Message',
+  'MOBILE_CALL_TRACKING':               'Mobile Clicks-to-Call',
+  'OFFER':                              'Sitelink / Promotion Asset',
+  'OTHER':                              'Other',
+  'PHONE_CALLS':                        'Manually Dialed Phone Calls',
+  'POST':                               'Headline',
+  'PRODUCT_EXTENSION':                  'Product Extension',
+  'PRODUCT_PLUSBOX':                    'Product Plus Box',
+  'SITELINK':                           'Sitelink',
+  'STORE_VISITS':                       'Store Visits',
+  'URL_CLICKS':                         'Website',
+  'VIDEO_APP_STORE_CLICKS':             'Video App Store',
+  'VIDEO_CALL_TO_ACTION_CLICKS':        'Video Call to Action',
+  'VIDEO_CARD_ACTION_HEADLINE_CLICKS':  'Video Card Headline',
+  'VIDEO_END_CAP_CLICKS':               'Video End Cap',
+  'VIDEO_WEBSITE_CLICKS':               'Video Website',
+  'WEBSITE_CALL':                       'Website Call',
+  'WEBSITE_CONTENT':                    'Website Content',
+  'WEBSITE_DIRECTIONS':                 'Website Directions',
+  'WEBSITE_MENU':                       'Website Menu',
+  'WEBSITE_MOBILE_DOWNLOAD':            'Website Mobile Download',
+  'WEBSITE_PHONE_CALL':                 'Website Phone Call',
+  'WEBSITE_RESERVATIONS':               'Website Reservations',
+  'WEBSITE_SEE_MENU':                   'Website See Menu',
+  'WEBSITE_ORDER':                      'Website Order',
+  'WEBSITE_CLICKS_TO_CALL':             'Website Clicks to Call',
+  'FILE_DOWNLOAD':                      'File Download',
+  'GOOGLE_MAPS_DRIVING_DIRECTIONS':     'Maps: Directions',
+  'GOOGLE_MAPS_SAVE':                   'Maps: Save',
+  'GOOGLE_MAPS_WEBSITE':                'Maps: Website',
+  'GOOGLE_MAPS_CALL':                   'Maps: Call',
+  'GOOGLE_MAPS_SHARE_LOCATION':         'Maps: Share Location',
+  'GOOGLE_MAPS_OTHER_ENGAGEMENT':       'Maps: Other',
+  'GOOGLE_MAPS_STORE_VISITS':           'Maps: Store Visits',
+  'GOOGLE_MAPS_ORDER':                  'Maps: Order',
+  'GOOGLE_MAPS_BOOK':                   'Maps: Book',
+  'LEAD_FORM_SUBMIT':                   'Cross-network Clicks',
+  'LEAD_FORM_OPEN':                     'Image Interaction',
+}
+
+export const AD_SLOT = {
+  // Numeric enum (0=UNSPECIFIED, 1=UNKNOWN, 2=SEARCH_SIDE, 3=SEARCH_TOP,
+  //   4=SEARCH_OTHER, 5=CONTENT, 6=SEARCH_PARTNER_TOP, 7=SEARCH_PARTNER_OTHER, 8=MIXED)
+  0: 'Other',
+  1: 'Unknown',
+  2: 'Search Right Side',
+  3: 'Top of Search',
+  4: 'Other Search',
+  5: 'Display',
+  6: 'Search Partner Top',
+  7: 'Search Partner Other',
+  8: 'Cross-network',
+  'SEARCH_SIDE':          'Search Right Side',
+  'SEARCH_TOP':           'Top of Search',
+  'SEARCH_OTHER':         'Other Search',
+  'CONTENT':              'Display',
+  'SEARCH_PARTNER_TOP':   'Search Partner Top',
+  'SEARCH_PARTNER_OTHER': 'Search Partner Other',
+  'SEARCH_RHS':           'Search Right Side',
+  'MIXED':                'Cross-network',
+  'UNKNOWN':              'Unknown',
+  'UNSPECIFIED':          'Unspecified',
+}
+
+export const MATCH_TYPE = {
+  2: 'Broad',
+  3: 'Phrase',
+  4: 'Exact',
+  'BROAD':   'Broad',
+  'PHRASE':  'Phrase',
+  'EXACT':   'Exact',
+  'UNKNOWN': 'Unknown',
+}
+
+export const APPROVAL_STATUS = {
+  1: 'Approved',
+  2: 'Approved Limited',
+  3: 'Area of Interest',
+  4: 'Disapproved',
+  5: 'Under Review',
+  'APPROVED':              'Approved',
+  'APPROVED_LIMITED':      'Approved Limited',
+  'AREA_OF_INTEREST_ONLY': 'Area of Interest',
+  'DISAPPROVED':           'Disapproved',
+  'UNDER_REVIEW':          'Under Review',
+  'REVIEW_IN_PROGRESS':    'Under Review',
+  'UNKNOWN':               'Unknown',
+}
+
+export const AD_STRENGTH = {
+  1: 'Pending',
+  2: 'No Ads',
+  3: 'Poor',
+  4: 'Average',
+  5: 'Fair',
+  6: 'Good',
+  7: 'Excellent',
+  'PENDING':   'Pending',
+  'NO_ADS':    'No Ads',
+  'POOR':      'Poor',
+  'AVERAGE':   'Average',
+  'FAIR':      'Fair',
+  'GOOD':      'Good',
+  'EXCELLENT': 'Excellent',
+  'UNSPECIFIED': 'Unknown',
+}
+
+export const CALL_STATUS = {
+  1: 'Unknown',  2: 'Missed',  3: 'Received',
+  'RECEIVED':    'Received',
+  'MISSED':      'Missed',
+  'UNKNOWN':     'Unknown',
+  'UNSPECIFIED': 'Unknown',
+}
+
+export const CALL_TYPE = {
+  1: 'Unknown',  2: 'Mobile click-to-call',  3: 'Manually Dialed',
+  4: 'Mobile click-to-call',  5: 'Tracked',  6: 'Wifi',
+  'MANUALLY_DIALED':               'Manually Dialed',
+  'HIGH_END_MOBILE_CLICK_TO_CALL': 'Mobile click-to-call',
+  'CLICK_TO_CALL':                 'Click-to-call',
+  'UNKNOWN':                       'Unknown',
+  'UNSPECIFIED':                   'Unknown',
+}
+
+export const CALL_TRACKING_CONDITION = {
+  1: 'Unknown',  2: 'Ad',  3: 'Landing Page',  4: 'Website Wrapper',  5: 'Unknown',
+  'AD':              'Ad',
+  'LANDING_PAGE':    'Landing Page',
+  'WEBSITE_WRAPPER': 'Website Wrapper',
+  'UNKNOWN':         'Unknown',
+}
+
+/**
+ * Universal resolver — returns a human-readable label for any enum value.
+ * Tries the value as-is, then as a string, then falls back to `fallback`.
+ */
+export function resolveEnum(map, value, fallback = 'Unknown') {
+  if (value === null || value === undefined) return fallback
+  return map[value] ?? map[String(value)] ?? fallback
+}

@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: #4a4a4a;
+  background: #f5f7fa;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+button  { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, select, textarea { font-family: inherit; font-size: 14px; }
+
+/* Thin scrollbar */
+::-webkit-scrollbar              { width: 5px; height: 5px; }
+::-webkit-scrollbar-track        { background: transparent; }
+::-webkit-scrollbar-thumb        { background: rgba(0,0,0,0.18); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover  { background: rgba(0,0,0,0.32); }
+
+/* Animations */
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.skeleton {
+  background: #dde9f5;
+  border-radius: 4px;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+/* Card base */
+.card {
+  background: #ffffff;
+  border: 1px solid #dde9f5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.card-header {
+  padding: 13px 18px;
+  border-bottom: 1px solid #dde9f5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a3a6b;
+}
+.card-body { padding: 18px; }
+
+/* Spinning refresh */
+.spin { animation: spin 0.9s linear infinite; }
+
+/* Fade-in for dashboard */
+.fade-in { animation: fadeIn 0.25s ease; }
+
+/* Reports tab bar — thin white scrollbar visible in Electron (Chromium) */
+.tab-bar-scroll { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.35) transparent; }
+.tab-bar-scroll::-webkit-scrollbar { height: 4px; }
+.tab-bar-scroll::-webkit-scrollbar-track { background: transparent; }
+.tab-bar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.35); border-radius: 2px; }
+.tab-bar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.6); }
+
+/* ── PDF full-page export ────────────────────────────────────────────────────
+   Applied by main.js via executeJavaScript before printToPDF so Chromium
+   expands all scrollable/height-constrained containers to their full content
+   height. `!important` is required to override inline styles.              */
+
+.pdf-printing html,
+.pdf-printing body,
+.pdf-printing #root {
+  height:   auto !important;
+  overflow: visible !important;
+  min-height: 0 !important;
+}
+
+.pdf-printing .app-shell {
+  height:   auto !important;
+  overflow: visible !important;
+  /* Sidebar is useless in print — hide it */
+}
+.pdf-printing .app-shell > :first-child { display: none !important; }
+
+.pdf-printing .app-main {
+  height:      auto !important;
+  overflow:    visible !important;
+  flex:        0 0 auto !important;
+  width:       100% !important;
+  min-width:   0 !important;
+}
+
+.pdf-printing .app-routes {
+  height:   auto !important;
+  overflow: visible !important;
+  flex:     0 0 auto !important;
+}
+
+/* Each page's scroll container */
+.pdf-printing .page-scroll-area {
+  overflow: visible !important;
+  height:   auto !important;
+  flex:     0 0 auto !important;
+}
+
+/* Inner content wrappers */
+.pdf-printing .page-scroll-area > * {
+  overflow: visible !important;
+  height:   auto !important;
+}
+
+/* Cards should not clip their own content */
+.pdf-printing .card { overflow: visible !important; }
+
+/* Hide the Export PDF button itself in the PDF */
+.pdf-printing .no-print { display: none !important; }
+
+/* Recharts needs explicit dimensions so keep its inline sizes */
+.pdf-printing .recharts-wrapper,
+.pdf-printing .recharts-surface { overflow: visible !important; }
+
+/* Footer always shows at the bottom */
+.pdf-printing footer,
+.pdf-printing [data-footer] { display: flex !important; }

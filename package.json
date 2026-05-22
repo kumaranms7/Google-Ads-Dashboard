@@ -1,0 +1,68 @@
+{
+  "name": "gads-dashboard-top-ten",
+  "version": "1.0.0",
+  "description": "GAds Dashboard by Top Ten Website Marketing",
+  "author": "Top Ten Website Marketing",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && node scripts/start-electron.js\"",
+    "build": "vite build",
+    "dist": "vite build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.95.2",
+    "dayjs": "^1.11.10",
+    "electron-store": "^8.2.0",
+    "google-ads-api": "^23.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.2.0",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^40.0.0",
+    "electron-builder": "^26.8.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
+    "lucide-react": "^0.460.0",
+    "react": "^18.3.1",
+    "react-datepicker": "^7.0.0",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "recharts": "^2.12.7",
+    "vite": "^7.0.0",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.toptenmarketing.gadsdashboard",
+    "productName": "GAds Dashboard - Top Ten Website Marketing",
+    "directories": {
+      "output": "dist-exe"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "files": [
+      "assets/**/*",
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx vite *)",
+      "Bash(set NODE_ENV=development)",
+      "Bash(npm run *)",
+      "Bash(npx electron *)",
+      "Bash(node -e \"const e = require\\('electron'\\); console.log\\(typeof e, JSON.stringify\\(Object.keys\\(e||{}\\)\\).substring\\(0,200\\)\\)\")",
+      "Bash(node_modules/electron/dist/electron.exe --version)",
+      "Bash(node -e ' *)",
+      "Bash(rm -f electron-debug.log)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); keys=[k for k in d if 'win32' in k and 'x64' in k]; print\\(json.dumps\\({k: d[k] for k in keys}, indent=2\\)\\)\")",
+      "Bash(node scripts/start-electron.js)",
+      "Bash(cat '/e/xampp/htdocs/Backups/topten/APPLICATIONS/Google Ads Dashboard/V2/electron-debug.log')",
+      "Bash(kill %1)",
+      "Bash(cd '/e/xampp/htdocs/Backups/topten/APPLICATIONS/Google Ads Dashboard/V2' && rm -f electron/debug-main.js electron-debug.log)",
+      "Bash(npx electron-builder *)",
+      "Bash(CSC_IDENTITY_AUTO_DISCOVERY=false WIN_CSC_LINK=\"\" WIN_CSC_KEY_PASSWORD=\"\" npx electron-builder --win)",
+      "Bash(env -u WIN_CSC_LINK -u WIN_CSC_KEY_PASSWORD -u CSC_LINK -u CSC_KEY_PASSWORD CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --win)",
+      "Bash(npm view *)",
+      "Bash(node -e \"const g = require\\('google-ads-api'\\); console.log\\('exports:', Object.keys\\(g\\).join\\(', '\\)\\)\")",
+      "Bash(node -e \"try { const g = require\\('google-ads-api'\\); console.log\\(Object.keys\\(g\\).join\\(' '\\)\\); } catch\\(e\\) { console.error\\(e.message\\); }\")",
+      "Bash(npm audit *)",
+      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\); const v=JSON.parse\\(d\\); console.log\\('Latest 10 stable:', v.filter\\(x=>/^\\\\d+\\\\.\\\\d+\\\\.\\\\d+$/.test\\(x\\)\\).slice\\(-10\\).join\\(', '\\)\\)\")",
+      "Bash(node -pe \"JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\).filter\\(v=>/^[45]\\\\./.test\\(v\\)\\).join\\(', '\\)\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\); const d=p.devDependencies; console.log\\('electron:', d.electron, '\\\\nelectron-builder:', d['electron-builder'], '\\\\nvite:', d.vite, '\\\\n@vitejs/plugin-react:', d['@vitejs/plugin-react']\\)\")",
+      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\);try{const j=JSON.parse\\(d\\);console.log\\('vulns:',j.metadata?.vulnerabilities?.total??'parse-error'\\)}catch{console.log\\('0 vulns \\(clean\\)'\\)}\")",
+      "Bash(dir \"e:\\\\xampp\\\\htdocs\\\\Backups\\\\topten\\\\APPLICATIONS\\\\Google Ads Dashboard\\\\V2\\\\src\\\\pages\" /b)",
+      "Bash(dir \"e:\\\\xampp\\\\htdocs\\\\Backups\\\\topten\\\\APPLICATIONS\\\\Google Ads Dashboard\\\\V2\\\\src\" /b/s)",
+      "Bash(Get-ChildItem -Path \"e:\\\\xampp\\\\htdocs\\\\Backups\\\\topten\\\\APPLICATIONS\\\\Google Ads Dashboard\\\\V2\" -Recurse -Filter \"*.jsx\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(git init *)",
+      "Bash(git add *)"
+    ],
+    "additionalDirectories": [
+      "e:\\e\\xampp\\htdocs\\Backups\\topten\\APPLICATIONS\\Google Ads Dashboard\\V2\\electron"
+    ]
+  }
+}
