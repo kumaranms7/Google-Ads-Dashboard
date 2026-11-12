@@ -5,9 +5,16 @@ import TopNav from './components/TopNav.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import Footer from './components/Footer.jsx'
 import SettingsModal from './components/SettingsModal.jsx'
+import BusinessProfileModal from './components/BusinessProfileModal.jsx'
 import Reports from './pages/Reports.jsx'
 import Keywords from './pages/Keywords.jsx'
-import Audit from './pages/Audit.jsx'
+import Audit from './pages/audit/index.jsx'
+import AIRSABuilder from './pages/ai-rsa-builder/index.jsx'
+import AISitelinksBuilder from './pages/ai-sitelinks-builder/index.jsx'
+import CampaignManager from './pages/campaign-manager/index.jsx'
+import AdGroupManager from './pages/ad-group-manager/index.jsx'
+import KeywordsManager from './pages/keywords-manager/index.jsx'
+import AIChatPanel from './components/AIChatPanel.jsx'
 
 function AppShell() {
   const location = useLocation()
@@ -22,11 +29,19 @@ function AppShell() {
   const [loading,         setLoading]         = useState(false)
   const [error,           setError]           = useState(null)
   const [settingsOpen,    setSettingsOpen]    = useState(false)
+  const [businessProfileOpen, setBusinessProfileOpen] = useState(false)
   const [accountsLoading, setAccountsLoading] = useState(false)
   const [accountsError,   setAccountsError]   = useState(null)
   const [refreshing,      setRefreshing]      = useState(false)
   const [lastRefreshed,   setLastRefreshed]   = useState(null)
   const [hidePaused,      setHidePaused]      = useState(false)
+  const [fontScale,       setFontScale]       = useState(100)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+
+  // Apply zoom to the entire document whenever fontScale changes
+  useEffect(() => {
+    document.body.style.zoom = fontScale + '%'
+  }, [fontScale])
 
   // ── Init ────────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -38,6 +53,8 @@ function AppShell() {
         ])
         setSettings(saved)
         if (prefs?.hidePaused !== undefined) setHidePaused(prefs.hidePaused)
+        if (prefs?.fontScale   !== undefined) setFontScale(prefs.fontScale)
+        if (prefs?.sidebarCollapsed !== undefined) setSidebarCollapsed(prefs.sidebarCollapsed)
         if (saved?.developerToken && saved?.refreshToken) {
           await loadAccounts(saved)
         } else {
@@ -110,16 +127,33 @@ function AppShell() {
     window.electronAPI.setPrefs({ hidePaused: value }).catch(() => {})
   }
 
+  const handleFontScaleChange = (value) => {
+    setFontScale(value)
+    window.electronAPI.setPrefs({ fontScale: value }).catch(() => {})
+  }
+
+  const handleToggleSidebar = () => {
+    setSidebarCollapsed(prev => {
+      const next = !prev
+      window.electronAPI.setPrefs({ sidebarCollapsed: next }).catch(() => {})
+      return next
+    })
+  }
+
   return (
     <div className="app-shell" style={{ display:'flex', height:'100vh', overflow:'hidden' }}>
-      <Sidebar
-        accounts={accounts} selectedAccount={selectedAccount}
-        onSelectAccount={handleSelectAccount}
-        onOpenSettings={() => setSettingsOpen(true)}
-        hasCredentials={!!(settings?.developerToken)}
-        loading={accountsLoading} error={accountsError}
-        activePath={location.pathname} onNavigate={navigate}
-      />
+      {!sidebarCollapsed && (
+        <Sidebar
+          accounts={accounts} selectedAccount={selectedAccount}
+          onSelectAccount={handleSelectAccount}
+          onOpenSettings={() => setSettingsOpen(true)}
+          onOpenBusinessProfile={() => setBusinessProfileOpen(true)}
+          hasCredentials={!!(settings?.developerToken)}
+          loading={accountsLoading} error={accountsError}
+          activePath={location.pathname} onNavigate={navigate}
+          onToggleSidebar={handleToggleSidebar}
+        />
+      )}
 
       <div className="app-main" style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', minWidth:0 }}>
         <TopNav
@@ -127,7 +161,9 @@ function AppShell() {
           dateRange={dateRange} onDateRangeChange={setDateRange}
           onRefresh={handleRefresh} refreshing={refreshing} lastRefreshed={lastRefreshed}
           hidePaused={hidePaused} onHidePausedChange={handleHidePausedChange}
+          fontScale={fontScale} onFontScaleChange={handleFontScaleChange}
           activePath={location.pathname}
+          sidebarCollapsed={sidebarCollapsed} onToggleSidebar={handleToggleSidebar}
         />
 
         <div className="app-routes" style={{ flex:1, overflow:'hidden', display:'flex', flexDirection:'column' }}>
@@ -153,6 +189,21 @@ function AppShell() {
             <Route path="/audit" element={
               <Audit selectedAccount={selectedAccount} dateRange={dateRange} />
             } />
+            <Route path="/ai-rsa-builder" element={
+              <AIRSABuilder selectedAccount={selectedAccount} hidePaused={hidePaused} />
+            } />
+            <Route path="/ai-sitelinks-builder" element={
+              <AISitelinksBuilder selectedAccount={selectedAccount} hidePaused={hidePaused} />
+            } />
+            <Route path="/campaign-manager" element={
+              <CampaignManager selectedAccount={selectedAccount} />
+            } />
+            <Route path="/ad-group-manager" element={
+              <AdGroupManager selectedAccount={selectedAccount} />
+            } />
+            <Route path="/keywords-manager" element={
+              <KeywordsManager selectedAccount={selectedAccount} dateRange={dateRange} />
+            } />
           </Routes>
         </div>
 
@@ -166,6 +217,15 @@ function AppShell() {
           canClose={!!(settings?.developerToken)}
         />
       )}
+
+      {businessProfileOpen && selectedAccount && (
+        <BusinessProfileModal
+          account={selectedAccount}
+          onClose={() => setBusinessProfileOpen(false)}
+        />
+      )}
+
+      <AIChatPanel selectedAccount={selectedAccount} dateRange={dateRange} />
     </div>
   )
 }

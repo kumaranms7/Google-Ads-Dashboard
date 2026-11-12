@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import ReportTable from './ReportTable.jsx'
 
 // ── Device split bar ──────────────────────────────────────────────────────────
 const DEVICE_COLOR = { Mobile: '#2563b0', Desktop: '#4caf50', Tablet: '#e8a020', Other: '#888' }
@@ -102,55 +103,31 @@ function BudgetUtilBar({ pct }) {
   )
 }
 
-function BudgetSection({ budget }) {
+export function BudgetSection({ budget, hideTitle }) {
   const items = budget?.length ? budget : []
   return (
     <div>
-      <div style={styles.sectionTitle}>Budget Pacing</div>
-      {items.length === 0 ? (
-        <div style={{ fontSize:12, color:'#aaa', textAlign:'center', padding:'8px 0' }}>No budget data</div>
-      ) : (
-        <div style={{ overflow:'auto' }}>
-          <table style={{ width:'100%', borderCollapse:'collapse', fontSize:11 }}>
-            <thead>
-              <tr>
-                {[['Campaign','left'],['Daily Budget','right'],['Avg. Spend','right'],['Utilization','center'],['Issue','center']].map(([l,a]) => (
-                  <th key={l} style={{ padding:'6px 7px', textAlign:a, fontSize:10, fontWeight:600,
-                    color:'#fff', background:'#1a3a6b', whiteSpace:'nowrap' }}>{l}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((b, i) => {
-                const ic = ISSUE_COLOR[b.issue]
-                return (
-                  <tr key={i} style={{ background: i%2===0 ? '#fff' : '#f5f7fa' }}>
-                    <td style={{ padding:'6px 7px', borderBottom:'1px solid #f0f4f8', maxWidth:130,
-                      overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
-                      color:'#1a3a6b', fontWeight:500 }} title={b.name}>{b.name}</td>
-                    <td style={{ padding:'6px 7px', borderBottom:'1px solid #f0f4f8', textAlign:'right', color:'#4a4a4a' }}>
-                      {fmtBudget(b.budget)}
-                    </td>
-                    <td style={{ padding:'6px 7px', borderBottom:'1px solid #f0f4f8', textAlign:'right', color:'#4a4a4a' }}>
-                      {fmtBudget(b.spend)}
-                    </td>
-                    <td style={{ padding:'6px 7px', borderBottom:'1px solid #f0f4f8', textAlign:'center' }}>
-                      <BudgetUtilBar pct={b.utilization ?? b.pct ?? 0}/>
-                    </td>
-                    <td style={{ padding:'6px 7px', borderBottom:'1px solid #f0f4f8', textAlign:'center' }}>
-                      {b.issue
-                        ? <span style={{ fontSize:10, fontWeight:600, padding:'2px 6px', borderRadius:3, whiteSpace:'nowrap',
-                            background:`${ic}22`, color:ic, border:`1px solid ${ic}44` }}>{b.issue}</span>
-                        : <span style={{ fontSize:10, color:'#4caf50', fontWeight:600 }}>OK</span>
-                      }
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {!hideTitle && <div style={styles.sectionTitle}>Budget Pacing</div>}
+      <ReportTable
+        noFilter
+        pagination defaultPageSize={10}
+        emptyMessage="No budget data"
+        columns={[
+          { key: 'name', label: 'Campaign', sortable: true, align: 'left' },
+          { key: 'budget', label: 'Daily Budget', sortable: true, align: 'right', format: v => fmtBudget(v) },
+          { key: 'spend', label: 'Avg. Spend', sortable: true, align: 'right', format: v => fmtBudget(v) },
+          { key: 'utilization', label: 'Utilization', sortable: true, align: 'center',
+            format: (v, row) => <BudgetUtilBar pct={v ?? row.pct ?? 0} /> },
+          { key: 'issue', label: 'Issue', sortable: true, align: 'center',
+            format: v => {
+              const ic = ISSUE_COLOR[v]
+              return v
+                ? <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 3, whiteSpace: 'nowrap', background: `${ic}22`, color: ic, border: `1px solid ${ic}44` }}>{v}</span>
+                : <span style={{ fontSize: 10, color: '#4caf50', fontWeight: 600 }}>OK</span>
+            } },
+        ]}
+        data={items}
+      />
     </div>
   )
 }
@@ -164,7 +141,7 @@ const styles = {
   divider: { height: 1, background: '#dde9f5' },
 }
 
-export default function BreakdownPanel({ deviceSplit, keywords, budget }) {
+export default function BreakdownPanel({ deviceSplit, keywords }) {
   return (
     <div className="card">
       <div className="card-header">
@@ -174,8 +151,6 @@ export default function BreakdownPanel({ deviceSplit, keywords, budget }) {
         <DeviceSection  deviceSplit={deviceSplit} />
         <div style={styles.divider} />
         <KeywordsSection keywords={keywords} />
-        <div style={styles.divider} />
-        <BudgetSection  budget={budget} />
       </div>
     </div>
   )

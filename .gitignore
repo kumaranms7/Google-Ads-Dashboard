@@ -4,3 +4,13 @@ dist-exe/
 *.log
 .DS_Store
 Thumbs.db
+
+# Code-signing certificate password — never commit this
+scripts/sign-config.json
+
+# Code-signing certificates
+*.pfx
+*.cer
+
+# Local backups
+.backups/

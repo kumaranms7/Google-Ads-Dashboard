@@ -6,7 +6,6 @@ const fmt = {
   usd:  v => '$' + Number(v ?? 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 }),
   pct:  v => Number(v ?? 0).toFixed(2) + '%',
   cpc:  v => '$' + Number(v ?? 0).toFixed(2),
-  roas: v => Number(v ?? 0).toFixed(2) + 'x',
 }
 
 const KPI_DEFS = [
@@ -16,10 +15,10 @@ const KPI_DEFS = [
   { key: 'spend',       label: 'Total Spend', format: 'usd' },
   { key: 'conversions', label: 'Conversions', format: 'num' },
   // Row 2
-  { key: 'ctr',      label: 'CTR',        format: 'pct'  },
-  { key: 'avgCpc',   label: 'Avg. CPC',   format: 'cpc'  },
-  { key: 'convRate', label: 'Conv. Rate', format: 'pct'  },
-  { key: 'roas',     label: 'ROAS',       format: 'roas' },
+  { key: 'ctr',      label: 'CTR',            format: 'pct' },
+  { key: 'avgCpc',   label: 'Avg. CPC',       format: 'cpc' },
+  { key: 'convRate', label: 'Conv. Rate',      format: 'pct' },
+  { key: 'cpa',      label: 'Cost / Conv.',    format: 'cpc' },
 ]
 
 function delta(current, previous) {

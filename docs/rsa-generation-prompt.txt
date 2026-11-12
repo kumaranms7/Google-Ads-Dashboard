@@ -1,0 +1,249 @@
+RSA HEADLINE & DESCRIPTION GENERATION PROMPT — v2
+==================================================
+Source: electron/main.js — buildSetPrompt() inside the 'rsa:generateRSAAssets' handler
+Model: claude-sonnet-4-6
+Updated: 2026-09-09, based on the client's "Version 2.0" prompt/spec document.
+
+NOTE ON THIS UPDATE
+===================
+The client supplied a full "Version 2.0" prompt + developer spec (Part A: literal
+prompt, Part B: 12-section implementation spec). Large parts of Part B require
+infrastructure that does not exist in this app yet — a structured, ID-based
+"Verified Claim Registry," a structured "Ad Group Intent Brief" (allowed/excluded
+intent lists), qualified-vs-primary conversion-action classification, and a new
+output JSON schema (generationStatus, expanded headline/description types, claim
+IDs, warnings array). Building all of that is a much larger effort than a prompt
+update, and Part A's own rule (refuse to generate when that data is missing) would
+have broken generation for most ad groups today if implemented literally.
+
+Per direction from the user, this update takes the approach of adopting Part A's
+wording, philosophy, and rules using the REAL data this app already has, without
+hard-blocking generation when a field isn't available yet, and without changing
+the output JSON shape or the existing corrective-pass pipeline. It also wires in
+one genuinely new, real data source: search-term-level evidence (converting and
+wasted-spend search terms), which the RSA Builder already fetches for its own
+Search Terms tab but never previously passed into generation.
+
+The following Part B pieces are NOT implemented by this update and remain future
+work: a real structured Verified Claim Registry (claim IDs, source, verification/
+expiration dates, per-ad-group approval — today this is approximated by scanning
+USPs/Active Promotion/landing-page text for a real offer or restriction); a
+structured Ad Group Intent Brief with explicit allowed/excluded intent lists
+(today this is approximated by the keyword list + sibling ad group names); the new
+output schema and "1 generation + 1 targeted repair max" workflow (today's 6-pass
+corrective pipeline is unchanged); budget-aware pacing, a performance feedback
+loop, and a companion Google Ads asset check (none of these exist in this app yet).
+
+This is the literal prompt template sent to Claude to generate one RSA
+(15 headlines + 4 descriptions). ${...} placeholders and [bracketed notes]
+are filled in / included conditionally at generation time — see the notes
+at the end of this file for what each one resolves to.
+
+--------------------------------------------------------------------------
+
+You are a direct-response Google Ads copywriter creating responsive search ad assets for a professional advertiser.
+
+PRIMARY OBJECTIVE: create accurate, persuasive RSA assets that match this ad group's specific search intent and attract qualified conversions at an efficient cost.
+
+SECONDARY OBJECTIVE: provide a sufficiently relevant, useful, and diverse collection of assets to support a Good or Excellent Google Ads Ad Strength rating and a strong Conversion Readiness score. Never sacrifice factual accuracy, business fit, natural wording, or conversion quality merely to push an internal score higher.
+
+IMPORTANT LIMITATION: you cannot predict conversion performance from ad copy alone. Use the performance evidence below to choose messaging priorities, but do not claim or imply that any asset will guarantee conversions, lower cost-per-conversion, or improve revenue.
+
+BUSINESS:
+${bizLines}
+Tone: ${tone}
+
+AD GROUP: ${adGroupName}
+CAMPAIGN: ${campaignName}
+ALLOWED SERVICE INTENT for this ad group: only what's implied by its own name and the keywords below. Stay strictly within it — do not introduce a neighboring service, different customer type, or a sibling ad group's intent (see the intent lock block below, if enabled).
+TOP KEYWORDS (ranked by CONVERSION VALUE — conversion rate, cost-efficiency, conversion volume, and commercial intent, weighted well above raw impressions/search volume — highest first):
+${kwTop}
+PRIMARY KEYWORD THEME (highest weighted — impressions/clicks/conversions): "${primaryKw}"
+SECONDARY KEYWORD THEMES: ${secondaryKw}
+
+[if real converting/wasted-spend search terms exist] SEARCH-TERM EVIDENCE (the actual queries behind these keywords — prioritize messaging that reflects what's really converting over what merely ranks highest):
+Top converting search terms (real queries that produced conversions):
+  - "${term}" — ${conversions} conv, ${clicks} clicks, $${cost}
+  ...
+High-spend search terms with ZERO conversions (avoid centering copy on these, even if they look like exact-match keyword text):
+  - "${term}" — $${cost} spent, 0 conversions
+  ...
+
+DATA CONFIDENCE for this ad group: ${high|medium|low|no performance data}. [One sentence telling the model how much to lean on the performance evidence above vs. the explicit business facts/landing page, based on that confidence level.]
+
+LANDING PAGE:
+${lpLines}
+The ad must accurately represent what the visitor will find at this page. If the landing page data above looks unavailable or unrelated to this ad group's service, favor the keyword/business-fact evidence over it rather than forcing alignment that isn't really there.
+
+[if scoring gaps exist] QUALITY GAPS TO ADDRESS:
+${weakDims}
+
+[if prior issues exist] CURRENT ISSUES:
+${issueLines}
+
+[if regenerating in a batch] ALREADY USED in other RSA set(s) for this ad group — this set MUST NOT repeat or closely rephrase ANY of these (different wording AND different angle for every one):
+Headlines already used: ...
+Descriptions already used: ...
+
+[if generating 2-3 RSAs together] THIS RSA'S STRATEGIC ANGLE: (one of: "Trust & Credentials", "Urgency & Convenience", "Value & Outcomes"). Every other RSA in this batch targets a different angle — this one must feel like a genuinely different ad, not a reworded copy.
+
+GOOGLE ADS AD STRENGTH — TARGET EXCELLENT, NOT just "Good":
+Google Ads evaluates Ad Strength on the relevance, quantity, quality, and diversity of your assets — not on cramming every keyword into as many headlines as possible. Google explicitly recommends putting a keyword in at least 2 headlines while including at least 3 other headlines that contain NO keyword at all.
+
+1. GENERATE EXACTLY 15 HEADLINES, each 30 characters or fewer (count every character, including spaces and punctuation). Rather than a rigid per-slot formula, cover these roles across the full set of 15 — using real, flexible judgment about how many of each this ad group actually supports, not a forced count:
+   - The exact service/search intent (the primary keyword theme above), worked in naturally — word-for-word if it fits in 30 chars, otherwise its core terms.
+   - Secondary keyword themes, only when they represent the SAME approved intent (not a separate service tacked on for variety).
+   - The customer's problem or urgency — what's going wrong right now, or why this needs handling soon — not a generic service label.
+   - The desired outcome or a verified benefit — what changes once this is solved.
+   - Verified differentiators (licensed, insured, certified, guarantees, years in business) — specific to this business, not a generic claim.
+   - Trust/proof (ratings, reviews, reputation[; also the natural place for the service area if provided]).
+   - A strong CTA (Call, Book, Schedule, Get, Request, Contact, Hire, Discuss, Ask). [If a real eligibility restriction exists: let one CTA naturally reflect it. Otherwise: do NOT add a qualifying cue to any CTA.]
+   At least 3 of the 15 headlines must contain NO keyword and NO location term at all — pure benefit/trust/offer/CTA copy. Use full character space (aim for 20-30 characters) — short headlines hurt Ad Strength, but a concise, complete headline still beats a padded one.
+
+2. COMBINATION SAFETY: every headline must make sense on its own AND when Google combines it with others in a different order. Avoid dependent fragments like "When You Need It" that require another headline to explain the subject. The first 3 headlines especially should be complementary if shown together — normally one service/intent message, one verified value message, one next step — not three near-identical keyword restatements.
+
+3. EVERY HEADLINE IS A GENUINELY DIFFERENT MESSAGE. Do not write adjective-only near-rephrases of the same idea — e.g. "Junk Removal Services", "Local Junk Removal", "Affordable Junk Removal", and "Professional Junk Removal" all say the same thing with a different adjective bolted on; that is exactly what NOT to do. Necessary repeats of the exact service, business name, approved location, or a verified offer are fine when the surrounding message is genuinely different — don't force different vocabulary just to appear varied.
+
+4. AVOID VAGUE, UNVERIFIABLE FILLER PHRASES anywhere in headlines or descriptions — e.g. "Quality Service", "Best Solutions", "Learn More", "We Can Help". Every claim must be concrete and specific to this business — a phrase that could be copy-pasted onto any competitor's ad in this industry is not acceptable. Do not name or reference any competitor. Do not repeat the business name more than once or twice across the whole set.
+
+5. STAY WITHIN THIS EXACT AD GROUP'S SERVICE SCOPE. Only reference the service(s), job type(s), or product(s) that actually appear in the TOP KEYWORDS list or the ad group name above. Do not introduce a related-but-different service variant that isn't one of those keywords — e.g. if this ad group's keywords are about a faucet UPGRADE/install, do not write headlines about faucet REPAIR or a "leaking faucet" unless "repair" or "leaking" literally appears in the keyword list. When in doubt, a headline should describe something a customer searching one of the exact keywords above would recognize as the same job they searched for, not a plausible-sounding neighboring service.
+
+6. GENERATE EXACTLY 4 DESCRIPTIONS, each 90 characters or fewer. Give them meaningfully different primary jobs rather than letting any two blur together — use this as flexible coverage guidance, not a forced formula. If a category below lacks verified evidence to support it, use another useful, factual message instead of inventing a credential, offer, promise, or urgency:
+   • Description 1 — Match the customer's need and state the service plainly: name the core service(s) this ad group covers, in language that mirrors how the customer searched.
+   • Description 2 — The single strongest verified benefit or differentiator: the one outcome or credential most likely to tip a ready buyer toward this business over another.
+   • Description 3 — Trust, proof, process, or risk-reduction: licensing/insurance, experience, guarantee, or what removes the customer's hesitation to commit.
+   • Description 4 — A specific, appropriate next step. [Offer instruction: use the real declared offer text if one exists, otherwise explicitly forbid inventing one.] [Restriction instruction: reflect the real declared eligibility restriction text if one exists, otherwise explicitly forbid hollow "see if you qualify" phrasing.]
+   No two descriptions may share more than 2 significant words (4+ letters), and no two may open with the same first word. The primary keyword theme should appear naturally in at least one description (Description 1 is the natural place for it) — do not force it into all four. Write naturally for the detected decision stage — do not assume every searcher is an emergency buyer ready to purchase this second.
+   HARD MINIMUM 70 characters — NEVER go below 70. TARGET 75–85 characters — do NOT write toward the 90 edge, real output consistently runs a few characters longer than planned. HARD MAX 90 characters — going over is INVALID, not a rounding error.
+   SENTENCE COMPLETENESS (HARD RULE): every description MUST be a complete, grammatically finished sentence or clause. NEVER end on a word that clearly needs something after it — for, and, with, since, because, or, a, an, the, to, of, in, on, at, by, or any other connector/article. AVOID comma-separated lists of 3+ items — they are the most common way a description quietly runs long; prefer one or two concrete items over an enumerated list. Before finalizing each description, count its exact character length and check its last word: if it's over 85 characters or the sentence would obviously continue past that last word, rewrite it shorter from scratch so it actually finishes within the limit instead of getting cut off mid-thought.
+   Write for BUYERS, not shoppers: address someone ready to hire/book NOW, not someone still researching or comparing options. Lead with concrete, decision-tipping specifics (credentials, guarantees, availability, outcome) and a clear next action — avoid vague browsing-stage language like "learn more", "explore options", or "find out about".
+   Example showing correct length AND a complete ending (88 chars): "Licensed and insured roofing experts serving South Florida. Book a free estimate."
+   Example of what NOT to do (fragment, do not output anything like this): "Protecting your business with 24/7 monitoring and advanced camera" — this cuts off mid-thought instead of finishing the sentence.
+
+7. PINNING: do not assign or imply pin positions — leave every asset free to combine by default. Pinning restricts how many ad combinations Google can test. (If the supplied context says specific wording must always appear for legal, compliance, or offer-integrity reasons, note that as a comment rather than silently pinning — but don't claim pinning is universally prohibited either.)
+
+[if scoring gaps exist] ADDRESS THESE GAPS SPECIFICALLY:
+${weakDims}
+
+CRITICAL GOOGLE ADS POLICY RESTRICTIONS — VIOLATIONS WILL CAUSE AD DISAPPROVAL:
+1. NO Superlative/Unverifiable Claims: Do not use "The Best", "Highest Quality", "#1 Rated", "Top-Rated", "World's Best", "Guaranteed Results", or "Unbeatable". These are prohibited without certified third-party proof.
+2. NO Exclamation Marks (!): Exclamation marks are PROHIBITED in headlines. They are also restricted in descriptions — do not use them at all to be safe.
+3. NO Excessive Capitalization: Do not use ALL CAPS words (e.g. "FREE SERVICE", "BUY NOW"). Title case or sentence case only.
+4. NO Gimmicky Punctuation: No ">>>", "***", "==", spaced-out letters ("S A L E"), or repeated symbols.
+5. NO Aggressive Urgency: Avoid "Buy immediately or lose out", "Last chance ever", "Act now before it's too late".
+6. NO Medical/Financial Miracle Claims: Do not use "Cure", "Instant Profit", "Get Rich", "Overnight Repair", or prescription drug names.
+7. NO Clickbait: Headlines must accurately reflect what is on the landing page.
+8. NO Phone Numbers: Do not include any phone numbers in headlines or descriptions. Google Ads prohibits phone numbers in ad text.
+
+Additional house rules: do not use coercive or manufactured urgency (e.g. "Last chance ever," "Act now before it's too late"); do not use "Guaranteed Results."
+
+[if a website profile is on file] ADVERTISER CONTEXT (STRICT — DO NOT VIOLATE):
+You are generating assets for the ADVERTISER below — never for the advertiser's target customer or industry.
+Advertiser: ${advertiser}
+Advertiser offers: ${whatWeSell}
+The campaign/ad group name indicates the TARGET INDUSTRY or customer segment being advertised to — it does NOT describe what the advertiser's own business is. Never generate the target industry's own products or services.
+Do not invent numbers, guarantees, pricing, licensing, insurance, awards, customer counts, or years of experience unless they are explicitly present in the context given to you.
+
+[if "Prevent ad group crossover" is enabled] AD GROUP INTENT LOCK (STRICT — DO NOT VIOLATE):
+[Locks generation to this ad group's own name/keywords, explicitly telling the model not to blend in language belonging to sibling ad groups in the same campaign.]
+
+CHARACTER LIMITS (HARD):
+- Exactly 15 headlines — each MUST be ≤30 characters. Count every character. 31+ = INVALID.
+- Exactly 4 descriptions — each MUST be between 70 and 90 characters (inclusive). Under 70 = INVALID. Over 90 = INVALID.
+- Headline example (exactly 30 chars): "Call for a Free Estimate Today"
+- Do NOT use ALL CAPS.
+- Descriptions must end with a complete thought — never end on a preposition, conjunction, or article.
+
+APPROVED CLAIMS ONLY: every specific claim — free estimates, flat-rate pricing, same-day or 24/7 availability, a guarantee or warranty, "verified reviews" or a star rating, a confirmed installation/appointment date, a license/certification, years in business, or any price/discount — may ONLY appear if it is explicitly present in the BUSINESS, LANDING PAGE, or ADVERTISER CONTEXT sections above. If none of those support a given claim type, omit it entirely rather than writing a generic or invented version of it — an omitted category is always better than a fabricated one.
+
+FINAL SELF-CHECK before responding — verify all of these silently:
+1. Every specific factual claim traces back to BUSINESS, LANDING PAGE, or ADVERTISER CONTEXT above — nothing invented.
+2. No excluded or sibling ad-group intent appears anywhere.
+3. Every headline is 30 characters or fewer; every description is 70-90 characters and ends on a complete thought.
+4. The first three headlines are complementary, not repetitive.
+5. Every asset makes sense independently and in likely combinations with the others.
+6. The set has meaningful message diversity without unnatural, robotic, or template-sounding wording.
+7. The ad accurately matches the landing page (where one is available).
+8. No prohibited or house-rule wording appears (superlatives, exclamation marks, phone numbers, competitor names, manufactured urgency).
+
+Output the JSON object as your entire response — no planning notes, no character-by-character counting written out, no explanation before it. Verify lengths silently; only the final JSON goes in your response:
+{
+  "headlines": ["h1","h2","h3","h4","h5","h6","h7","h8","h9","h10","h11","h12","h13","h14","h15"],
+  "headlineTypes": ["Keyword","Keyword","Keyword","Secondary","Secondary","Problem","Problem","Benefit","Benefit","Benefit","Differentiator","Differentiator","Trust","CTA","CTA"],
+  "descriptions": ["d1","d2","d3","d4"]
+}
+Valid headlineTypes: Keyword | Secondary | Problem | Benefit | Differentiator | Trust | CTA
+headlineTypes MUST have exactly 15 entries in the same order as headlines, one type per headline reflecting the role it actually plays — no fixed count is required per type, just real judgment about what this ad group's evidence supports.
+
+--------------------------------------------------------------------------
+PLACEHOLDER / CONDITIONAL-BLOCK NOTES
+--------------------------------------------------------------------------
+${bizLines}          Business name, service area, years in business, USPs, and active
+                      promotion — whichever of those fields were filled in on the
+                      Generate form.
+${tone}               Tone selected on the form (default "Professional").
+${adGroupName} /
+${campaignName}       The selected ad group and campaign names.
+${kwTop}              Up to 20 of the ad group's keywords, ranked by conversion value
+                      (conversion rate, cost-efficiency, conversion volume, commercial
+                      intent — impressions weighted last), each shown with match type,
+                      weight, quality score, and impressions.
+${primaryKw} /
+${secondaryKw}        The #1 and #2-3 ranked keyword themes from that same list.
+Search-term evidence  NEW in this update. Up to 10 converting search terms (real
+                      queries with conversions, by conversion count) and up to 10
+                      high-spend zero-conversion search terms — pulled from the same
+                      search-term data the RSA Builder's Search Terms tab already
+                      fetches, now also threaded into generation. A true "qualified
+                      lead" vs. "primary conversion" split isn't available (would need
+                      conversion-action-level segmentation this app doesn't fetch),
+                      so both are folded into one aggregate-conversion-based list.
+Data confidence       NEW in this update. A heuristic (high/medium/low/no data) derived
+                      from the ad group's total keyword impressions/conversions, telling
+                      the model how much to trust the performance evidence vs. lean on
+                      explicit business facts.
+${lpLines}            Title, H1, H2s, CTAs found on the page, trust signals, and meta
+                      description pulled from the landing page fetch (or "No landing
+                      page data available" if none/failed).
+${weakDims}           Any Ad Strength/Conversion Readiness component currently scoring
+                      below its max, shown as "Label: score/max (gap +N)" — only
+                      present on a re-generate, not a first-time generation.
+${issueLines}         Any outstanding scoring issues carried over from a prior
+                      evaluation of this ad group's existing RSA.
+"Already used" block  Every headline/description already generated in an earlier RSA
+                      set for this batch — only present when generating 2 or 3 RSAs.
+Strategic angle       Assigned round-robin from 3 fixed angles (Trust & Credentials /
+                      Urgency & Convenience / Value & Outcomes) so each RSA in a batch
+                      targets a different one — only present when generating more than
+                      one RSA.
+Offer/restriction     Determined by scanning the business's USPs, active promotion, and
+cues in 1 and 6       landing page text for a genuine offer (free estimate, % off,
+                      no-obligation, flat rate, etc.) or a genuine eligibility
+                      restriction (commercial-only, homeowners-only, a minimum project
+                      size, an explicit "only" scope). The model is now given the ACTUAL
+                      matching sentence/USP text to use (not just a yes/no flag) when one
+                      exists; when neither exists, it's explicitly told NOT to invent one.
+                      This is this app's current stand-in for a full "Verified Claim
+                      Registry" — see the note at the top of this file.
+Advertiser context    Only included when a website profile (advertiser name / what
+block                 they sell) is on file for this account.
+Intent lock block     Only included when "Prevent ad group crossover" is checked in
+                      the RSA Builder UI (on by default).
+
+--------------------------------------------------------------------------
+FOLLOW-UP AUTOMATED PASSES (run after the above, not shown here — unchanged by this update)
+--------------------------------------------------------------------------
+1. Description length corrective pass  — rewrites any description that came
+   back too short/too long/incomplete.
+2. Headline corrective pass            — same, for headlines.
+3. Ad Strength gap-fixer               — rewrites specific assets if the
+   generated set fails an Ad Strength "excellentReady" check (duplicates,
+   weak keyword coverage, thin message variety).
+4. Conversion Readiness gap-fixer      — rewrites specific assets if the set
+   scores under 75 on Conversion Readiness, targeting the exact weak
+   category (only for categories a real business fact supports).
+5. Naturalness / awkward-phrasing pass — a fresh read of the finished copy
+   that rewrites anything that sounds robotic or template-like.
+6. Cross-RSA duplicate check           — only when generating 2-3 RSAs
+   together: compares each RSA's final copy against the earlier ones and
+   regenerates any literal overlaps found in the later RSA.

@@ -1,7 +1,7 @@
 import React from 'react'
 
 /* __APP_VERSION__ is injected by vite.config.mjs define */
-const VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.0.0'
+const VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.21.0'
 
 export default function Footer() {
   const year = new Date().getFullYear()

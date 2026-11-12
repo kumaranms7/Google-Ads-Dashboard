@@ -68,6 +68,9 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 /* Fade-in for dashboard */
 .fade-in { animation: fadeIn 0.25s ease; }
 
+/* Phone Conv help tooltip */
+.phone-conv-help:hover .phone-conv-tooltip { display: block !important; }
+
 /* Reports tab bar — thin white scrollbar visible in Electron (Chromium) */
 .tab-bar-scroll { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.35) transparent; }
 .tab-bar-scroll::-webkit-scrollbar { height: 4px; }
@@ -91,9 +94,13 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 .pdf-printing .app-shell {
   height:   auto !important;
   overflow: visible !important;
-  /* Sidebar is useless in print — hide it */
 }
-.pdf-printing .app-shell > :first-child { display: none !important; }
+/* Sidebar is useless in print — hide it. Targeted by its own class rather
+   than `:first-child`: when the user has already collapsed the sidebar
+   (it isn't rendered at all), .app-main becomes the shell's first child
+   instead, and a position-based selector would hide the content itself
+   — producing the blank-PDF bug seen when exporting with the sidebar hidden. */
+.pdf-printing .app-sidebar { display: none !important; }
 
 .pdf-printing .app-main {
   height:      auto !important;
@@ -124,6 +131,19 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 
 /* Cards should not clip their own content */
 .pdf-printing .card { overflow: visible !important; }
+
+/* Outer Reports page wrapper — must expand so the scroll area inside is visible */
+.pdf-printing .reports-page-wrap {
+  overflow: visible !important;
+  height:   auto    !important;
+  flex:     0 0 auto !important;
+}
+
+/* Keep card headers attached to their body — don't orphan a header at a page bottom */
+.pdf-printing .card-header { page-break-after: avoid; break-after: avoid; }
+
+/* Drop shadows don't render well in print */
+.pdf-printing *  { box-shadow: none !important; }
 
 /* Hide the Export PDF button itself in the PDF */
 .pdf-printing .no-print { display: none !important; }

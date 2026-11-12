@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI RSA Ad Builder — Feature Documentation</title>
+<style>
+  :root {
+    --navy: #1a3a6b;
+    --blue-light: #dde9f5;
+    --green: #2e7d32;
+    --orange: #e65100;
+    --red: #c0392b;
+    --purple: #6a1b9a;
+    --teal: #00695c;
+    --gold: #a56700;
+    --text: #222;
+    --muted: #666;
+    --border: #e0e8f5;
+    --bg: #f4f7fc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: var(--text); background: #fff; line-height: 1.6; }
+
+  /* Layout */
+  .wrapper { max-width: 1100px; margin: 0 auto; padding: 40px 32px; }
+  .cover { background: var(--navy); color: #fff; padding: 48px 32px 40px; text-align: center; }
+  .cover h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+  .cover p { font-size: 15px; opacity: 0.75; max-width: 560px; margin: 0 auto; }
+  .cover .meta { margin-top: 20px; font-size: 12px; opacity: 0.5; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* TOC */
+  .toc { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 24px 28px; margin: 36px 0; }
+  .toc h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--navy); margin-bottom: 14px; }
+  .toc ol { padding-left: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 32px; }
+  .toc li { font-size: 13px; }
+  .toc a { color: var(--navy); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  /* Sections */
+  h2.section-title { font-size: 22px; font-weight: 800; color: var(--navy); margin: 48px 0 6px; padding-bottom: 10px; border-bottom: 3px solid var(--navy); }
+  h3.sub-title { font-size: 16px; font-weight: 700; color: var(--navy); margin: 28px 0 8px; }
+  h4.detail-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 20px 0 8px; }
+  p { margin-bottom: 12px; font-size: 14px; color: #333; }
+
+  /* Screenshot containers */
+  .screenshot { margin: 20px 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: 0 3px 12px rgba(0,0,0,.08); }
+  .screenshot img { width: 100%; display: block; }
+  .screenshot figcaption { background: var(--bg); border-top: 1px solid var(--border); padding: 8px 14px; font-size: 12px; color: var(--muted); }
+
+  .screenshot-placeholder { margin: 20px 0; border: 2px dashed #bbd0ed; border-radius: 10px; background: #f8faff; padding: 28px 24px; text-align: center; }
+  .screenshot-placeholder .icon { font-size: 28px; margin-bottom: 8px; }
+  .screenshot-placeholder .label { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .screenshot-placeholder .desc { font-size: 12px; color: var(--muted); }
+
+  /* Callout boxes */
+  .callout { border-radius: 8px; padding: 14px 18px; margin: 14px 0; font-size: 13px; }
+  .callout.info  { background: #e8f0fd; border-left: 4px solid var(--navy); }
+  .callout.tip   { background: #e8f5e9; border-left: 4px solid var(--green); }
+  .callout.warn  { background: #fff8e6; border-left: 4px solid var(--gold); }
+  .callout strong { font-weight: 700; }
+
+  /* Badges */
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .type-keyword  { background: #e3edff; color: #1565c0; border: 1px solid #b3c8f0; }
+  .type-cta      { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+  .type-trust    { background: #f3e5f5; color: #6a1b9a; border: 1px solid #ce93d8; }
+  .type-urgency  { background: #ffebee; color: #c0392b; border: 1px solid #ef9a9a; }
+  .type-benefit  { background: #e0f2f1; color: #00695c; border: 1px solid #80cbc4; }
+  .type-location { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+  .type-problem  { background: #ede7f6; color: #4527a0; border: 1px solid #b39ddb; }
+  .label-keep    { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+  .label-replace { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+  .label-remove  { background: #ffebee; color: #c0392b; border: 1px solid #ef9a9a; }
+  .label-risky   { background: #fff8e6; color: #a56700; border: 1px solid #ffe082; }
+  .label-generic { background: #f5f5f5; color: #555; border: 1px solid #ddd; }
+
+  /* Score dimensions table */
+  table.dims { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  table.dims th { background: var(--navy); color: #fff; padding: 8px 12px; font-size: 12px; font-weight: 600; text-align: left; }
+  table.dims td { padding: 8px 12px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.dims tr:nth-child(even) td { background: var(--bg); }
+
+  /* Step list */
+  .steps { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+  .steps li { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; counter-increment: step; }
+  .steps li::before { content: counter(step); min-width: 26px; height: 26px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .steps li .content strong { display: block; font-size: 14px; color: var(--navy); margin-bottom: 3px; }
+  .steps li .content span { font-size: 13px; color: #444; }
+
+  /* Feature grid */
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .feature-card { border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; background: var(--bg); }
+  .feature-card h4 { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .feature-card p { font-size: 12px; color: #555; margin: 0; }
+
+  /* Column explainer */
+  .col-table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  .col-table th { background: #eef2f7; color: var(--navy); padding: 7px 12px; font-size: 12px; font-weight: 700; text-align: left; border: 1px solid var(--border); }
+  .col-table td { padding: 8px 12px; font-size: 13px; border: 1px solid var(--border); vertical-align: top; }
+  .col-table tr:nth-child(even) td { background: #fafcff; }
+
+  /* Score ring visual */
+  .score-ring-demo { display: flex; gap: 32px; align-items: center; padding: 20px; background: var(--bg); border-radius: 10px; border: 1px solid var(--border); margin: 12px 0; flex-wrap: wrap; }
+  .ring { text-align: center; }
+  .ring .circle { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; color: #fff; margin: 0 auto 6px; }
+  .ring .grade { font-size: 12px; font-weight: 700; }
+  .excellent .circle { background: conic-gradient(#2e7d32 calc(88/100*360deg), #e0e0e0 0); }
+  .good .circle      { background: conic-gradient(#4caf50 calc(72/100*360deg), #e0e0e0 0); }
+  .average .circle   { background: conic-gradient(#e65100 calc(55/100*360deg), #e0e0e0 0); }
+  .poor .circle      { background: conic-gradient(#c0392b calc(35/100*360deg), #e0e0e0 0); }
+
+  /* Misc */
+  hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+  code { background: #f0f4f8; padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 12px; color: #c0392b; }
+  ul.plain { list-style: disc; padding-left: 20px; margin: 8px 0; }
+  ul.plain li { margin-bottom: 5px; font-size: 13px; }
+
+  @media print {
+    .wrapper { padding: 0; max-width: 100%; }
+    .cover { background: var(--navy) !important; -webkit-print-color-adjust: exact; }
+    h2.section-title { page-break-before: always; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ COVER ══ -->
+<div class="cover">
+  <h1>🤖 AI RSA Ad Builder</h1>
+  <p>Complete feature documentation — audit existing ads, score them with AI, and generate optimised Responsive Search Ad assets</p>
+  <div class="meta">GAdsDashboard V2 &nbsp;·&nbsp; Top Ten Website Marketing &nbsp;·&nbsp; May 2026</div>
+</div>
+
+<div class="wrapper">
+
+<!-- ═══════════════════════════════════════════════════════ TOC ══ -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#access">Accessing the Page</a></li>
+    <li><a href="#layout">Page Layout</a></li>
+    <li><a href="#step1">Step 1 — Selecting a Campaign &amp; Ad Group</a></li>
+    <li><a href="#tab1">Tab 1 — Audit Existing RSA</a></li>
+    <li><a href="#audit-card">RSA Audit Card</a></li>
+    <li><a href="#types">Headline Types</a></li>
+    <li><a href="#labels">Asset Labels</a></li>
+    <li><a href="#quality-score">RSA Quality Score</a></li>
+    <li><a href="#ai-recs">AI Recommended Headlines</a></li>
+    <li><a href="#score-actions">AI Actions to Reach 95+</a></li>
+    <li><a href="#intent">Intent &amp; Search Term Analysis</a></li>
+    <li><a href="#landing-page">Landing Page Analysis</a></li>
+    <li><a href="#keywords-section">Keywords Section</a></li>
+    <li><a href="#tab2">Tab 2 — Generate New RSA using AI</a></li>
+    <li><a href="#generated-view">Generated Assets View</a></li>
+    <li><a href="#scoring-dims">Scoring Dimensions Reference</a></li>
+    <li><a href="#faq">FAQ &amp; Tips</a></li>
+  </ol>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ 1. OVERVIEW ══ -->
+<h2 class="section-title" id="overview">1. Overview</h2>
+
+<p>The <strong>AI RSA Ad Builder</strong> is an end-to-end tool for improving Responsive Search Ad performance. It combines automated asset auditing, a 6-dimension quality scoring engine, and Claude AI to give you both a diagnosis of your current RSA and a complete set of AI-generated replacement assets.</p>
+
+<div class="feature-grid">
+  <div class="feature-card">
+    <h4>Tab 1 — Audit Existing RSA</h4>
+    <p>Analyses every headline and description in your current RSA, classifies each by type, flags problems, generates AI replacement suggestions, and scores the ad across 6 quality dimensions.</p>
+  </div>
+  <div class="feature-card">
+    <h4>Tab 2 — Generate New RSA using AI</h4>
+    <p>Builds a brand-new set of 15 headlines and 4 descriptions from scratch using Claude AI, guided by your business details, keywords, landing page content, and a specific headline-type distribution.</p>
+  </div>
+  <div class="feature-card">
+    <h4>RSA Quality Score (0–100)</h4>
+    <p>A proprietary score across Keyword Relevance, Uniqueness, CTA Diversity, Landing Page Alignment, Trust Signals, and Conversion Focus — with a Before / After comparison once AI recs are generated.</p>
+  </div>
+  <div class="feature-card">
+    <h4>AI Recommendations (Claude)</h4>
+    <p>Auto-generates replacement headlines on load and on demand. Replacements are strategically chosen to fill the biggest score gaps, not just swap like-for-like.</p>
+  </div>
+</div>
+
+<div class="callout info">
+  <strong>Prerequisite:</strong> A Claude API key must be configured in <strong>Settings → AI Features</strong> before AI features will work. Auditing and scoring work without an API key.
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ 2. ACCESS ══ -->
+<h2 class="section-title" id="access">2. Accessing the Page</h2>
+
+<p>Click <strong>AI RSA Builder</strong> in the left sidebar navigation. The page is account-specific — the currently selected account name and ID are displayed at the top of the page header.</p>
+
+<figure class="screenshot">
+  <img src="screenshots/01_initial_state.png" alt="AI RSA Builder — initial state">
+  <figcaption>Fig 1 — AI RSA Builder initial state. The Campaign and Ad Group dropdowns must be populated before analysis can begin.</figcaption>
+</figure>
+
+
+<!-- ═══════════════════════════════════════════════════════ 3. LAYOUT ══ -->
+<h2 class="section-title" id="layout">3. Page Layout</h2>
+
+<p>The page is divided into three main zones:</p>
+
+<ul class="plain">
+  <li><strong>Header strip</strong> — shows the page title, active account name, and account ID.</li>
+  <li><strong>Control bar</strong> — Campaign dropdown, Ad Group dropdown, and the Analyze Ad Group button. This bar is always visible at the top regardless of which tab is active.</li>
+  <li><strong>Tab area</strong> — switches between the Audit view (Tab 1) and the Generator form (Tab 2).</li>
+</ul>
+
+<div class="callout tip">
+  <strong>Tip:</strong> The Campaign and Ad Group selection applies to <em>both</em> tabs. Run "Analyze Ad Group" once to unlock both the audit and the AI generator with full context.
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ 4. STEP 1 ══ -->
+<h2 class="section-title" id="step1">4. Step 1 — Selecting a Campaign &amp; Ad Group</h2>
+
+<ol class="steps">
+  <li>
+    <div class="content">
+      <strong>Select a Campaign</strong>
+      <span>Click the <em>Campaign</em> dropdown. All active (and optionally paused) campaigns for the selected Google Ads account load automatically. Choose the campaign that contains the RSA you want to audit.</span>
+    </div>
+  </li>
+  <li>
+    <div class="content">
+      <strong>Select an Ad Group</strong>
+      <span>Once a campaign is chosen, the <em>Ad Group</em> dropdown populates with all ad groups in that campaign. Select the specific ad group containing the RSA.</span>
+    </div>
+  </li>
+  <li>
+    <div class="content">
+      <strong>Click "Analyze Ad Group"</strong>
+      <span>The button activates only after both dropdowns have a selection. Clicking it fetches the RSA assets, keywords, search terms, and landing page in a single call, then runs the full local analysis. This also auto-triggers AI recommendation generation in the background.</span>
+    </div>
+  </li>
+</ol>
+
+<figure class="screenshot">
+  <img src="screenshots/02_campaign_dropdown_open.png" alt="AI RSA Builder — initial state">
+  <figcaption>Fig 2 — Select a campaign, then an ad group. Capture the state before clicking Analyze to show both dropdowns populated and the blue Analyze Ad Group button enabled.</figcaption>
+</figure>
+
+
+<div class="callout warn">
+  <strong>Note:</strong> While loading, a spinner appears with the message "Fetching RSA data, keywords, and search terms…". This typically takes 3–8 seconds depending on the account size.
+</div>
+
+<figure class="screenshot">
+  <img src="screenshots/03_campaign_selected.png" alt="AI RSA Builder — initial state">
+  <figcaption>Fig 3 — Capture the brief loading state that appears after clicking Analyze Ad Group, showing the spinner message.</figcaption>
+</figure>
+
+
+
+<!-- ═══════════════════════════════════════════════════════ 5. TAB 1 ══ -->
+<h2 class="section-title" id="tab1">5. Tab 1 — Audit Existing RSA</h2>
+
+<p>Tab 1 is the default view. After analysis completes, it displays one audit card per RSA ad found in the ad group (most ad groups have one RSA), followed by intent analysis, landing page analysis, and keywords.</p>
+
+<figure class="screenshot">
+  <img src="screenshots/04_adgroup_dropdown_open.png" alt="AI RSA Builder — initial state">
+  <figcaption>After clicking Analyze Ad Group and loading completes, capture the top of Tab 1 showing the RSA Audit card header with Ad Strength badge and performance stats.</figcaption>
+</figure>
+
+
+<!-- ═══════════════════════════════════════════════════════ 6. AUDIT CARD ══ -->
+<h2 class="section-title" id="audit-card">6. RSA Audit Card</h2>
+
+<p>Each RSA in the ad group gets its own audit card. The card header shows:</p>
+<ul class="plain">
+  <li><strong>Ad Strength badge</strong> — Google's native ad strength rating (Poor / Average / Good / Excellent) pulled directly from the API.</li>
+  <li><strong>Performance stats</strong> — Impressions, clicks, and spend for the account date range (shown when data is available).</li>
+</ul>
+
+<h3 class="sub-title">6.1 Headlines Table</h3>
+
+<p>The headlines table lists all 15 RSA headline slots with the following columns:</p>
+
+<table class="col-table">
+  <thead>
+    <tr>
+      <th>#</th><th>Headline</th><th>Type</th><th>Chars</th><th>Suggestion</th><th>AI Recommended Headline</th><th>AI Chars</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="color:#aaa;font-size:11px">Row number</td>
+      <td>The actual headline text from your Google Ads RSA</td>
+      <td>Classified type badge — see Section 7</td>
+      <td>Character count vs the 30-character limit. <span style="color:#2e7d32">Green</span> = within limit; <span style="color:#c0392b">Red</span> = over limit</td>
+      <td>Audit label — see Section 8</td>
+      <td>Claude-generated replacement for non-Keep headlines</td>
+      <td>Character count of the AI recommendation</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<h3 class="sub-title">6.2 Re-Generate AI Recommendations Button</h3>
+<p>Appears in the top-right of the headlines section when there are non-Keep headlines. Click it to request a fresh set of AI recommendations from Claude. The new recommendations are generated using the same score-gap-driven strategy.</p>
+
+<h3 class="sub-title">6.3 Descriptions Section</h3>
+<p>Below the headlines table, all 4 descriptions are listed in a simpler card layout showing the text, character count (vs. 90-character limit), and their label badge.</p>
+
+<h3 class="sub-title">6.4 Label Legend</h3>
+<p>A colour-coded legend at the bottom of the audit card summarises all possible label values for quick reference.</p>
+
+<figure class="screenshot">
+  <img src="screenshots/10_ai_actions.png" alt="AI RSA Builder — initial state">
+</figure>
+
+
+<!-- ═══════════════════════════════════════════════════════ 7. TYPES ══ -->
+<h2 class="section-title" id="types">7. Headline Types</h2>
+
+<p>Every headline is automatically classified into one of 7 types. The classification is rule-based and runs entirely locally (no API call). The type badge appears in the <em>Type</em> column of the headlines table and in the generated assets view.</p>
+
+<table class="dims">
+  <thead><tr><th>Type</th><th>Badge colour</th><th>What qualifies</th><th>Examples</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><span class="badge type-keyword">Keyword</span></td>
+      <td>Blue</td>
+      <td>Headline contains or closely matches one of the ad group's keywords</td>
+      <td>"Junk Removal Dallas", "Same-Day Junk Pickup"</td>
+    </tr>
+    <tr>
+      <td><span class="badge type-cta">CTA</span></td>
+      <td>Green</td>
+      <td>Starts with an imperative verb: Call, Book, Schedule, Request, Get, Contact, Hire, Order, Reserve</td>
+      <td>"Call for a Free Estimate", "Book Your Pickup Today"</td>
+    </tr>
+    <tr>
+      <td><span class="badge type-trust">Trust</span></td>
+      <td>Purple</td>
+      <td>Contains a credential or social proof signal</td>
+      <td>"Licensed &amp; Insured Since 2009", "5-Star Rated Service", "15 Years Experience"</td>
+    </tr>
+    <tr>
+      <td><span class="badge type-urgency">Urgency</span></td>
+      <td>Red</td>
+      <td>Contains a time-critical commitment or availability signal</td>
+      <td>"Same-Day Removal Available", "24/7 Emergency Service", "Available This Weekend"</td>
+    </tr>
+    <tr>
+      <td><span class="badge type-benefit">Benefit</span></td>
+      <td>Teal</td>
+      <td>Describes a service quality outcome or positive experience (default when no other type matches)</td>
+      <td>"Hassle-Free Junk Removal", "No Mess Left Behind", "Fast &amp; Easy Cleanouts"</td>
+    </tr>
+    <tr>
+      <td><span class="badge type-location">Location</span></td>
+      <td>Orange</td>
+      <td>Contains a geo-specific term or matches the ad group's service area</td>
+      <td>"Serving Dallas &amp; DFW", "Greater Houston Area", "Local Junk Haulers"</td>
+    </tr>
+    <tr>
+      <td><span class="badge type-problem">Problem-Solution</span></td>
+      <td>Indigo</td>
+      <td>Poses a question or addresses a pain point directly</td>
+      <td>"Cluttered Garage? We Clear It", "Too Much Junk?", "Tired of the Mess?"</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout info">
+  <strong>Why type matters:</strong> A high-scoring RSA needs a balanced mix of types. If all 15 headlines are Benefit type, the ad lacks CTAs and Trust signals that Google rewards. The type classification helps you spot these gaps at a glance.
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ 8. LABELS ══ -->
+<h2 class="section-title" id="labels">8. Asset Labels</h2>
+
+<p>Each headline and description is assigned one of the following labels after the local audit:</p>
+
+<table class="dims">
+  <thead><tr><th>Label</th><th>Colour</th><th>Meaning</th><th>Action recommended</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><span class="badge label-keep">Keep</span></td>
+      <td>Green</td>
+      <td>Passes all quality checks — no forbidden wording, not a duplicate, not too generic, and includes either a keyword match or a CTA</td>
+      <td>No change needed. AI will not generate a replacement for Keep headlines.</td>
+    </tr>
+    <tr>
+      <td><span class="badge label-replace">Replace</span></td>
+      <td>Orange</td>
+      <td>Passes basic checks but has no CTA and no keyword match — it's not harmful but doesn't pull its weight</td>
+      <td>Review the AI recommendation and replace if the suggested headline is clearly stronger.</td>
+    </tr>
+    <tr>
+      <td><span class="badge label-remove">Remove</span></td>
+      <td>Red</td>
+      <td>Empty asset, exact duplicate of another headline in the same ad, or extremely short (&lt;6 chars)</td>
+      <td>Delete this headline and use the AI recommendation in its slot.</td>
+    </tr>
+    <tr>
+      <td><span class="badge label-risky">Risky</span></td>
+      <td>Amber</td>
+      <td>Contains wording that signals low intent or is typically forbidden in local-service ads (cheap, DIY, curbside pickup, landfill, bulk pickup, municipal pickup)</td>
+      <td>Replace immediately — these terms attract the wrong searchers and waste budget.</td>
+    </tr>
+    <tr>
+      <td><span class="badge label-generic">Too Generic</span></td>
+      <td>Grey</td>
+      <td>A filler phrase that adds no specific value ("Best Service", "We Are #1", "Learn More", "Click Here")</td>
+      <td>Replace with a specific, benefit-driven headline.</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════ 9. QUALITY SCORE ══ -->
+<h2 class="section-title" id="quality-score">9. RSA Quality Score</h2>
+
+<p>The RSA Quality Score is embedded at the bottom of each audit card and is computed entirely locally — it does not use Claude AI. It scores the ad on a <strong>0–100 scale</strong> across 6 dimensions.</p>
+
+<h3 class="sub-title">9.1 Score Rings — Before / After</h3>
+
+<p>Two circular rings are displayed side by side:</p>
+<ul class="plain">
+  <li><strong>Before</strong> — the score of the RSA as it currently exists in Google Ads.</li>
+  <li><strong>After (AI Recs)</strong> — the projected score if all non-Keep headlines are replaced with the AI-recommended headlines. This ring only appears once recommendations have been generated.</li>
+</ul>
+
+<div class="score-ring-demo">
+  <div class="ring excellent">
+    <div class="circle" style="background: conic-gradient(#2e7d32 317deg, #e0e0e0 0);">88</div>
+    <div class="grade" style="color:#2e7d32">Excellent</div>
+    <div style="font-size:11px;color:#aaa;margin-top:2px">82–100</div>
+  </div>
+  <div class="ring good">
+    <div class="circle" style="background: conic-gradient(#4caf50 259deg, #e0e0e0 0);">72</div>
+    <div class="grade" style="color:#4caf50">Good</div>
+    <div style="font-size:11px;color:#aaa;margin-top:2px">65–81</div>
+  </div>
+  <div class="ring average">
+    <div class="circle" style="background: conic-gradient(#e65100 198deg, #e0e0e0 0);">55</div>
+    <div class="grade" style="color:#e65100">Average</div>
+    <div style="font-size:11px;color:#aaa;margin-top:2px">45–64</div>
+  </div>
+  <div class="ring poor">
+    <div class="circle" style="background: conic-gradient(#c0392b 126deg, #e0e0e0 0);">35</div>
+    <div class="grade" style="color:#c0392b">Poor</div>
+    <div style="font-size:11px;color:#aaa;margin-top:2px">0–44</div>
+  </div>
+  <div style="font-size:13px;color:#555;max-width:200px">Score grade thresholds: Poor → Average → Good → Excellent</div>
+</div>
+
+<figure class="screenshot">
+  <img src="screenshots/10_ai_actions.png" alt="AI RSA Builder — initial state">
+</figure>
+
+<h3 class="sub-title">9.2 Score Breakdown Bars</h3>
+
+<p>Six horizontal bars show the contribution of each dimension to the total score:</p>
+
+<table class="dims">
+  <thead><tr><th>Dimension</th><th>Max Points</th><th>How it's measured</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Keyword Relevance</strong></td><td>20</td><td>What percentage of the ad group's keywords appear (or have a word in common) with at least one headline or description.</td></tr>
+    <tr><td><strong>Uniqueness</strong></td><td>20</td><td>Penalises duplicate headlines (−4 pts each), near-duplicates (−2 pts each), and words used in 7 or more headlines (−2 pts per overused word).</td></tr>
+    <tr><td><strong>CTA Diversity</strong></td><td>15</td><td>Counts distinct CTA-type words (Call, Get, Book, Schedule, Request, Hire, etc.) found anywhere across all assets. +3 pts per unique CTA word, capped at 15.</td></tr>
+    <tr><td><strong>Landing Page Alignment</strong></td><td>20</td><td>Measures word overlap between the ad copy and the landing page H1, H2s, and title tag. Scored 0–20 based on overlap percentage.</td></tr>
+    <tr><td><strong>Trust Signals</strong></td><td>15</td><td>Counts trust-signal patterns found in the assets: Licensed, Insured, Bonded, Certified, Guaranteed, Years, Rated, Family-Owned, Free Estimate, No Obligation, etc. +3 pts each, capped at 15.</td></tr>
+    <tr><td><strong>Conversion Focus</strong></td><td>10</td><td>Counts urgency signals (Same-Day, 24/7, Today, Emergency, Fast, Quick, etc.) +3 pts each, capped at 10. Penalises generic filler and forbidden wording.</td></tr>
+  </tbody>
+</table>
+
+
+
+<h3 class="sub-title">9.3 Issues to Fix</h3>
+<p>When the audit finds specific problems, they are listed in a red "Issues to Fix" panel next to the breakdown bars. Examples include: <em>"Low keyword coverage in ad copy"</em>, <em>"No trust signals (licensed, insured, years experience…)"</em>, <em>"2 duplicate headline(s)"</em>.</p>
+
+
+<!-- ═══════════════════════════════════════════════════════ 10. AI RECS ══ -->
+<h2 class="section-title" id="ai-recs">10. AI Recommended Headlines</h2>
+
+<p>AI recommendations are generated <strong>automatically</strong> as soon as analysis completes — you don't need to click anything. Claude AI receives:</p>
+<ul class="plain">
+  <li>The non-Keep headlines (with their types and audit labels)</li>
+  <li>The Keep headlines (with their types) so Claude knows what's already covered</li>
+  <li>The full score breakdown with gap sizes per dimension</li>
+  <li>The top keywords of the ad group</li>
+</ul>
+
+<p>Claude is instructed to <strong>choose the type that best fills the largest score gap</strong>, not necessarily match the original headline's type. For example, if the score has a big gap in Trust Signals, a weak Benefit headline slot will be replaced with a Trust headline (Licensed, Insured, etc.).</p>
+
+<h3 class="sub-title">Generation Rules enforced in the prompt</h3>
+<ul class="plain">
+  <li>30 characters or fewer — Claude counts every character</li>
+  <li>CTA replacements must start with: Call, Book, Schedule, Request, Get, Contact, or Hire</li>
+  <li>Trust replacements must include: Licensed / Insured / Bonded / Certified / Guaranteed / Rated / X Years</li>
+  <li>Urgency replacements must include: Same-Day / 24/7 / Emergency / Today / Available Now (not just "Fast")</li>
+  <li>No repeating words already heavily present in the kept headlines</li>
+  <li>No ALL CAPS, no generic filler</li>
+</ul>
+
+<div class="callout tip">
+  <strong>Re-Generate button:</strong> If the AI recommendations don't look right (Claude made a wrong choice or a headline is over 30 characters), click <strong>🔄 Re-Generate AI Recommendations</strong> in the top-right of the headlines section to request a fresh set.
+</div>
+
+
+
+
+<!-- ═══════════════════════════════════════════════════════ 11. SCORE ACTIONS ══ -->
+<h2 class="section-title" id="score-actions">11. AI Actions to Reach 95+</h2>
+
+<p>When the current score is below 95, a prioritised action panel appears at the bottom of the Quality Score section. Each action card shows:</p>
+<ul class="plain">
+  <li>A <strong>+N pts</strong> badge (green for small gaps, amber for medium, red for large)</li>
+  <li>The <strong>dimension name</strong> that needs improvement</li>
+  <li>A specific, actionable recommendation tailored to the ad's actual content</li>
+</ul>
+
+<p>Actions are sorted by impact (largest gap first), so the most important improvements appear at the top. Examples of action messages:</p>
+<ul class="plain">
+  <li><em>"Add 1–2 headlines with trust signals: Licensed &amp; Insured, X Years Experience, Satisfaction Guaranteed, Family-Owned"</em></li>
+  <li><em>"Add 2 CTA headlines starting with: Call, Book, Schedule, Request, or Get"</em></li>
+  <li><em>"Your landing page keywords are missing from the ad. Add headlines using: removal, junk, dallas, hauling"</em></li>
+</ul>
+
+
+
+<!-- ═══════════════════════════════════════════════════════ 12. INTENT ══ -->
+<h2 class="section-title" id="intent">12. Intent &amp; Search Term Analysis</h2>
+
+<p>Below the audit card, an <strong>Intent Analysis</strong> section shows the search terms that triggered this ad group's ads, classified by purchase intent:</p>
+
+<table class="dims">
+  <thead><tr><th>Intent Category</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><strong>High Intent</strong></td><td>Terms indicating immediate purchase readiness (e.g. "junk removal near me today", "schedule junk pickup")</td></tr>
+    <tr><td><strong>Research</strong></td><td>Terms indicating comparison shopping or information gathering (e.g. "junk removal cost", "best junk removal")</td></tr>
+    <tr><td><strong>Branded</strong></td><td>Terms containing a competitor or specific brand name</td></tr>
+    <tr><td><strong>Low Intent</strong></td><td>Broad or off-topic terms unlikely to convert (e.g. "how to get rid of junk for free", "free dump near me")</td></tr>
+    <tr><td><strong>Navigational</strong></td><td>Terms searching for a specific business by name</td></tr>
+  </tbody>
+</table>
+
+<p>Warning banners appear at the top of the section when Low Intent spend exceeds a meaningful threshold of total spend, flagging potential wasted budget.</p>
+
+<figure class="screenshot">
+  <img src="screenshots/11_intent_analysis.png" alt="AI RSA Builder — initial state">
+</figure>
+
+
+<!-- ═══════════════════════════════════════════════════════ 13. LANDING PAGE ══ -->
+<h2 class="section-title" id="landing-page">13. Landing Page Analysis</h2>
+
+<p>The system fetches the first unique destination URL found in the ad group's ads and analyses its content. The section shows:</p>
+<ul class="plain">
+  <li><strong>Landing page URL</strong> with a direct link to open it</li>
+  <li><strong>Page title</strong> and <strong>H1 heading</strong></li>
+  <li><strong>H2 headings</strong> found on the page</li>
+  <li><strong>Trust signals</strong> detected (Licensed, Insured, Certified mentions, etc.)</li>
+  <li><strong>CTAs on page</strong> (button or link text)</li>
+  <li><strong>Alignment score</strong> — a 0–100 match score with grade (Good / Average / Poor) comparing the ad copy against the landing page content</li>
+  <li><strong>Mismatch warnings</strong> when the landing page H1 doesn't align with the ad group theme</li>
+</ul>
+
+<figure class="screenshot">
+  <img src="screenshots/12_landing_page.png" alt="AI RSA Builder — initial state">
+</figure>
+
+
+<!-- ═══════════════════════════════════════════════════════ 14. KEYWORDS ══ -->
+<h2 class="section-title" id="keywords-section">14. Keywords Section</h2>
+
+<p>A compact keyword table at the bottom of Tab 1 shows all active keywords in the ad group with their match type, Quality Score (1–10), CPC, impressions, and clicks. This context is used by both the scoring engine and the AI recommendation prompt.</p>
+
+<figure class="screenshot">
+  <img src="screenshots/13_keyword_match.png" alt="AI RSA Builder — initial state">
+</figure>
+
+
+<!-- ═══════════════════════════════════════════════════════ 15. TAB 2 ══ -->
+<h2 class="section-title" id="tab2">15. Tab 2 — Generate New RSA using AI</h2>
+
+<p>Tab 2 generates a complete brand-new RSA from scratch. It requires analysis to have been run first (to provide keyword context). Click <strong>Generate New RSA using AI</strong> in the tab bar to switch.</p>
+
+<figure class="screenshot">
+  <img src="screenshots/13_tab2_generate_form.png" alt="Tab 2 — Generate New RSA using AI (empty state)">
+  <figcaption>Fig 2 — Tab 2 empty state before an ad group is analyzed. After running Analyze Ad Group, the form fields become available.</figcaption>
+</figure>
+
+<h3 class="sub-title">15.1 Form Fields</h3>
+
+<table class="dims">
+  <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Business Name</strong></td><td>Auto-filled</td><td>Pre-populated from the selected Google Ads account name. Read-only — not editable. Used in 1–2 headlines if the name fits within 30 characters.</td></tr>
+    <tr><td><strong>City / Service Area</strong></td><td>Optional</td><td>Geographic targeting context. Used to generate Location-type headlines and improve landing page alignment scoring.</td></tr>
+    <tr><td><strong>Years in Business</strong></td><td>Optional</td><td>Used in Trust headlines (e.g. "15 Years of Junk Removal"). Enter a number.</td></tr>
+    <tr><td><strong>USP 1 / 2 / 3</strong></td><td>Optional</td><td>Your three main unique selling propositions. These are injected directly into the prompt. Examples: "Licensed &amp; Insured", "Same-Day Service", "Free Estimates".</td></tr>
+    <tr><td><strong>Active Promotion</strong></td><td>Optional</td><td>A current offer to incorporate into the copy (e.g. "10% Off This Month", "$50 Off First Pickup").</td></tr>
+    <tr><td><strong>Tone</strong></td><td>Optional</td><td>Controls the overall writing style: Professional (default), Urgent, or Friendly.</td></tr>
+  </tbody>
+</table>
+
+<figure class="screenshot">
+  <img src="screenshots/14_tab2_form.png" alt="AI RSA Builder — initial state">
+</figure>
+
+<h3 class="sub-title">15.2 Headline Distribution</h3>
+
+<p>Claude is instructed to produce exactly 15 headlines with this type distribution:</p>
+
+<table class="dims">
+  <thead><tr><th>Type</th><th>Count</th><th>Focus</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge type-keyword">Keyword</span></td><td>4–5</td><td>Directly includes a core service keyword from the ad group</td></tr>
+    <tr><td><span class="badge type-cta">CTA</span></td><td>3–4 <strong>(mandatory)</strong></td><td>Must start with: Call, Book, Schedule, Get, Request, Contact, or Hire</td></tr>
+    <tr><td><span class="badge type-trust">Trust</span></td><td>2–3</td><td>Credentials or proof: Licensed, Insured, Rated, Years Exp, Guaranteed</td></tr>
+    <tr><td><span class="badge type-urgency">Urgency</span></td><td>2–3</td><td>Time-critical: Same-Day, 24/7, Emergency, Available Now, Today</td></tr>
+    <tr><td><span class="badge type-benefit">Offer / Benefit</span></td><td>2–3</td><td>Offer: Free Estimate, Flat Rate, No Hidden Fees — or — Benefit: Fast, Easy, Hassle-Free</td></tr>
+  </tbody>
+</table>
+
+<div class="callout tip">
+  <strong>Target distribution:</strong> 4 Keyword + 3 CTA + 2 Trust + 3 Urgency + 3 Offer/Benefit = 15 headlines.
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ 16. GENERATED VIEW ══ -->
+<h2 class="section-title" id="generated-view">16. Generated Assets View</h2>
+
+<p>After Claude responds (typically 5–15 seconds), the form is replaced by the <strong>Generated Assets View</strong> showing the complete RSA with its projected quality score.</p>
+
+<h3 class="sub-title">16.1 Projected Score Ring</h3>
+<p>A score ring shows the projected RSA Quality Score for the newly generated asset set (computed using the same 6-dimension engine). This is the score you would expect to see after applying the generated headlines and descriptions.</p>
+
+<h3 class="sub-title">16.2 Headlines Table</h3>
+<p>All 15 generated headlines in a table with Type badge, character count, and a copy button per row. Headlines over 30 characters are flagged in red — regenerate if any are over the limit.</p>
+
+<h3 class="sub-title">16.3 Descriptions</h3>
+<p>All 4 generated descriptions listed with their character counts (vs. 90-character limit) and individual copy buttons.</p>
+
+<h3 class="sub-title">16.4 Buttons</h3>
+<ul class="plain">
+  <li><strong>Copy All Headlines</strong> — copies all 15 headlines to clipboard, one per line</li>
+  <li><strong>Copy All Descriptions</strong> — copies all 4 descriptions to clipboard</li>
+  <li><strong>Re-Generate</strong> — clears results and returns to the form to re-submit (keeping form values intact)</li>
+</ul>
+
+<figure class="screenshot">
+  <img src="screenshots/16.4-buttons.png" alt="AI RSA Builder — initial state">
+</figure>
+
+
+
+
+<!-- ═══════════════════════════════════════════════════════ 17. SCORING DIMS ══ -->
+<h2 class="section-title" id="scoring-dims">17. Scoring Dimensions Reference</h2>
+
+<p>Full scoring formula breakdown for reference:</p>
+
+<table class="dims">
+  <thead><tr><th>Dimension</th><th>Max</th><th>Formula detail</th><th>How to improve</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Keyword Relevance</strong></td><td>20</td>
+      <td>Count of ad-group keywords that appear (by word match, >3 chars) in at least one asset. Score = (matched / min(total, 10)) × 20.</td>
+      <td>Add 2–3 Keyword-type headlines that include your top keywords verbatim.</td>
+    </tr>
+    <tr>
+      <td><strong>Uniqueness</strong></td><td>20</td>
+      <td>Start at 20. −4 per exact duplicate, −2 per near-duplicate, −2 per word appearing in 7+ headlines (>4 chars).</td>
+      <td>Vary your vocabulary. A 15-headline RSA about junk removal will naturally repeat "junk" and "removal" — that's fine. Avoid repeating minor descriptors like "fast" in 8 headlines.</td>
+    </tr>
+    <tr>
+      <td><strong>CTA Diversity</strong></td><td>15</td>
+      <td>Count of unique CTA-pattern words found anywhere in all assets. +3 per distinct CTA word, capped at 15.</td>
+      <td>Use 3–4 different imperative verbs: Call, Book, Schedule, Request, Get. Don't use the same verb twice.</td>
+    </tr>
+    <tr>
+      <td><strong>Landing Page Alignment</strong></td><td>20</td>
+      <td>Word overlap between all ad assets and the LP's H1 + H2s + title. Score = (overlap / total-ad-words) × 60, capped at 20.</td>
+      <td>Mirror the language on your landing page. If the LP says "junk hauling," use "hauling" in at least one headline.</td>
+    </tr>
+    <tr>
+      <td><strong>Trust Signals</strong></td><td>15</td>
+      <td>Count of trust-signal regex patterns found in any asset. +3 per match, capped at 15 (5 distinct signals max).</td>
+      <td>Add headlines with: Licensed &amp; Insured, X Years Experience, 5-Star Rated, Satisfaction Guaranteed, Family-Owned.</td>
+    </tr>
+    <tr>
+      <td><strong>Conversion Focus</strong></td><td>10</td>
+      <td>Count of urgency-signal patterns. +3 per match, capped at 10. Deductions for generic filler assets.</td>
+      <td>Use: Same-Day, 24/7, Today, Emergency, Available Now. Each urgency word in any asset counts once.</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════ 18. FAQ ══ -->
+<h2 class="section-title" id="faq">18. FAQ &amp; Tips</h2>
+
+<h3 class="sub-title">Why is the "Analyze Ad Group" button disabled?</h3>
+<p>Both Campaign and Ad Group must be selected. The button is also disabled during loading.</p>
+
+<h3 class="sub-title">AI recommendations generated but the "After" ring isn't showing</h3>
+<p>The After ring only appears after at least one AI recommendation has loaded. If no recommendations appear after 30 seconds, check that a Claude API key is set in Settings and look for an error banner beneath the headlines table.</p>
+
+<h3 class="sub-title">An AI-recommended headline is over 30 characters</h3>
+<p>The character count in the "AI Chars" column turns red for over-limit headlines. Click <strong>Re-Generate AI Recommendations</strong> — Claude re-counts carefully each time, but occasionally misjudges. A fresh generation almost always fixes this.</p>
+
+<h3 class="sub-title">The Quality Score is lower than expected</h3>
+<p>Common reasons: no keywords in the ad group matched against the headlines (Keyword Relevance = 0), no landing page data loaded (Landing Page Alignment defaults to 10), or the ad has no trust signals whatsoever. The Issues to Fix panel will identify the exact problems.</p>
+
+<h3 class="sub-title">Tab 2 shows "Select a Campaign and Ad Group above, then click Analyze Ad Group to enable generation"</h3>
+<p>The generator requires analysis to have been run first. Go to Tab 1, run Analyze Ad Group, then switch back to Tab 2.</p>
+
+<h3 class="sub-title">How do I apply the generated headlines?</h3>
+<p>Use <strong>Copy All Headlines</strong> to copy all 15 to clipboard, then paste them directly into the Google Ads RSA editor. For individual headlines, use the per-row copy button.</p>
+
+<h3 class="sub-title">What is the "Risky" label about?</h3>
+<p>Certain words attract low-quality traffic for local service businesses: <code>cheap</code>, <code>DIY</code>, <code>do-it-yourself</code>, <code>curbside pickup</code>, <code>bulk pickup</code>, <code>city pickup</code>, <code>municipal pickup</code>, <code>dump near me</code>, <code>waste site</code>, <code>landfill</code>. These are common in junk removal ads but drive searchers who want free or city services, not paid professional removal.</p>
+
+<h3 class="sub-title">Does "Free Estimate" trigger the Risky label?</h3>
+<p>No. "Free Estimate" is a legitimate RSA headline. The word <code>free</code> was removed from the forbidden patterns because it occurs naturally in high-quality service-business headlines. Only genuinely low-intent phrases remain forbidden.</p>
+
+<hr>
+<p style="text-align:center;font-size:12px;color:#aaa;margin-top:32px">
+  AI RSA Ad Builder · GAdsDashboard V2 · Top Ten Website Marketing · Documentation generated May 2026
+</p>
+
+</div><!-- /wrapper -->
+</body>
+</html>

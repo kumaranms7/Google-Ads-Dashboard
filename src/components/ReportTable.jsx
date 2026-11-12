@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { ChevronUp, ChevronDown, ChevronsUpDown, Search, X } from 'lucide-react'
 import StatusBadge from './StatusBadge.jsx'
+import usePdfExportMode from '../hooks/usePdfExportMode.js'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100, 250]
 
@@ -35,9 +36,19 @@ export default function ReportTable({
   emptyMessage    = 'No data available for the selected period',
   hidePaused      = false,
   pagination      = true,    // show pagination controls automatically when rows > pageSize
-  defaultPageSize = 10,      // initial rows-per-page
+  defaultPageSize = 25,      // initial rows-per-page
   noFilter        = false,   // hide the built-in text filter bar
   resizable       = false,   // enable drag-to-resize column headers
+  // Opt-in row-selection column (checkbox per row + a header checkbox that
+  // selects/deselects every row on the CURRENT page). Selection state is
+  // owned by the caller — this just renders it and reports toggles — so it
+  // survives sorting/filtering/pagination the same way the caller's own
+  // "Remove Selected" action needs it to.
+  selectable        = false,
+  rowKey             = (row, i) => row.resourceName ?? i,
+  selectedKeys       = null,          // Set of currently-selected keys
+  onToggleRow        = () => {},      // (key, row) => void
+  onToggleAllVisible = () => {},      // (visibleKeys, allSelected) => void
 }) {
   const [sortKey,       setSortKey]       = useState(columns[0]?.key || '')
   const [sortAsc,       setSortAsc]       = useState(false)
@@ -45,6 +56,11 @@ export default function ReportTable({
   const [appliedFilter, setAppliedFilter] = useState('')
   const [page,     setPage]     = useState(0)
   const [pageSize, setPageSize] = useState(defaultPageSize)
+  // While a PDF export is capturing this table, show every row regardless
+  // of the current page — see usePdfExportMode for why pagination can't
+  // just be left alone and fixed via CSS.
+  const pdfExportMode = usePdfExportMode()
+  const effectivePagination = pagination && !pdfExportMode
 
   // ── Column resize state ───────────────────────────────────────────────────
   const [colWidths, setColWidths] = useState(() => {
@@ -110,22 +126,29 @@ export default function ReportTable({
       )
     }
     if (!rows.length) return []
+    // A column can supply sortValue(row) for fields that aren't a plain
+    // row[key] — e.g. a cost-per-conversion column derived from cost/conversions.
+    const sortCol = columns.find(c => c.key === sortKey)
     return [...rows].sort((a, b) => {
-      const va = a[sortKey], vb = b[sortKey]
+      const va = sortCol?.sortValue ? sortCol.sortValue(a) : a[sortKey]
+      const vb = sortCol?.sortValue ? sortCol.sortValue(b) : b[sortKey]
       if (va == null) return 1
       if (vb == null) return -1
       if (typeof va === 'number') return sortAsc ? va-vb : vb-va
       return sortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va))
     })
-  }, [data, sortKey, sortAsc, hidePaused, appliedFilter])
+  }, [data, sortKey, sortAsc, hidePaused, appliedFilter, columns])
 
   // Rows to render — either all or the current page slice
-  const totalPages  = pagination ? Math.max(1, Math.ceil(sorted.length / pageSize)) : 1
-  const visibleRows = pagination ? sorted.slice(page * pageSize, (page + 1) * pageSize) : sorted
-  const rangeStart  = pagination ? page * pageSize + 1 : 1
-  const rangeEnd    = pagination ? Math.min((page + 1) * pageSize, sorted.length) : sorted.length
+  const totalPages  = effectivePagination ? Math.max(1, Math.ceil(sorted.length / pageSize)) : 1
+  const visibleRows = effectivePagination ? sorted.slice(page * pageSize, (page + 1) * pageSize) : sorted
+  const rangeStart  = effectivePagination ? page * pageSize + 1 : 1
+  const rangeEnd    = effectivePagination ? Math.min((page + 1) * pageSize, sorted.length) : sorted.length
 
-  const totalCols = columns.length + 1 // +1 for S.No
+  const visibleKeys       = selectable ? visibleRows.map((r, i) => rowKey(r, i)) : []
+  const allVisibleSelected = selectable && visibleKeys.length > 0 && visibleKeys.every(k => selectedKeys?.has(k))
+
+  const totalCols = columns.length + 1 + (selectable ? 1 : 0) // +1 for S.No, +1 for the checkbox column
 
   function renderCell(row, col, ci) {
     const raw = row[col.key]
@@ -138,7 +161,7 @@ export default function ReportTable({
   return (
     <div>
       {/* Filter bar */}
-      {!noFilter && <div style={{ padding:'8px 12px', borderBottom:'1px solid #f0f4f8', display:'flex', alignItems:'center', gap:8, background:'#fafcff' }}>
+      {!noFilter && <div className="no-print" style={{ padding:'8px 12px', borderBottom:'1px solid #f0f4f8', display:'flex', alignItems:'center', gap:8, background:'#fafcff' }}>
         <Search size={13} style={{ color:'#aaa', flexShrink:0 }} />
         <input
           value={filterText}
@@ -157,10 +180,23 @@ export default function ReportTable({
         )}
       </div>}
 
-      <div style={{ overflow:'auto', maxHeight:'70vh' }}>
+      <div style={{ overflow: pdfExportMode ? 'visible' : 'auto', maxHeight: pdfExportMode ? 'none' : '70vh' }}>
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
           <thead>
             <tr>
+              {selectable && (
+                <th style={{
+                  background:'#1a3a6b', padding:'9px 10px', textAlign:'center', width:34,
+                  position:'sticky', top:0, zIndex:2,
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={allVisibleSelected}
+                    onChange={() => onToggleAllVisible(visibleKeys, allVisibleSelected)}
+                    style={{ cursor:'pointer' }}
+                  />
+                </th>
+              )}
               <th style={{
                 background:'#1a3a6b', color:'#fff', padding:'9px 10px',
                 fontSize:11, fontWeight:600, textAlign:'center', whiteSpace:'nowrap', width:42,
@@ -205,18 +241,29 @@ export default function ReportTable({
               : sorted.length === 0
                 ? <tr><td colSpan={totalCols} style={{ padding:'28px 0', textAlign:'center', color:'#aaa' }}>{emptyMessage}</td></tr>
                 : visibleRows.map((row, vi) => {
-                    const ri = pagination ? page * pageSize + vi : vi
+                    const ri = effectivePagination ? page * pageSize + vi : vi
+                    const key = selectable ? rowKey(row, vi) : null
                     return (
                       <tr key={ri}
                         style={{ background: vi%2===0 ? '#fff' : '#f5f7fa' }}
                         onMouseEnter={e => { e.currentTarget.style.background='#edf3fb' }}
                         onMouseLeave={e => { e.currentTarget.style.background=vi%2===0?'#fff':'#f5f7fa' }}
                       >
+                        {selectable && (
+                          <td style={{ padding:'8px 10px', textAlign:'center', borderBottom:'1px solid #f0f4f8', width:34 }}>
+                            <input
+                              type="checkbox"
+                              checked={!!selectedKeys?.has(key)}
+                              onChange={() => onToggleRow(key, row)}
+                              style={{ cursor:'pointer' }}
+                            />
+                          </td>
+                        )}
                         <td style={{ padding:'8px 10px', textAlign:'center', borderBottom:'1px solid #f0f4f8', color:'#aaa', fontSize:11, width:42 }}>
                           {ri + 1}
                         </td>
                         {columns.map((col, ci) => {
-                          const tdWidth = resizable ? (colWidths[col.key] || col.width) : undefined
+                          const tdWidth = resizable ? (colWidths[col.key] || col.width) : (col.wrap ? col.width : undefined)
                           return (
                             <td key={col.key} style={{
                               padding:'8px 12px',
@@ -224,12 +271,12 @@ export default function ReportTable({
                               borderBottom:'1px solid #f0f4f8',
                               color: ci===0 ? '#1a3a6b' : '#4a4a4a',
                               fontWeight: ci===0 ? 500 : 400,
-                              maxWidth: resizable ? tdWidth : (col.wrap ? undefined : (ci===0 ? 240 : undefined)),
-                              width:    resizable ? tdWidth : undefined,
+                              maxWidth: resizable ? tdWidth : (col.wrap ? tdWidth : (ci===0 ? 240 : undefined)),
+                              width:    tdWidth,
                               overflow: col.wrap ? 'hidden' : 'hidden',
                               textOverflow: col.wrap ? undefined : 'ellipsis',
                               whiteSpace: col.wrap ? 'normal' : 'nowrap',
-                              verticalAlign: col.wrap ? 'top' : undefined,
+                              verticalAlign: 'middle',
                             }}>
                               {renderCell(row, col, ci)}
                             </td>
@@ -243,9 +290,9 @@ export default function ReportTable({
         </table>
       </div>
 
-      {/* Pagination controls — only shown when there is more than one page */}
-      {pagination && !loading && totalPages > 1 && (
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', borderTop:'1px solid #f0f4f8', flexWrap:'wrap', gap:8 }}>
+      {/* Pagination footer — rows-per-page always shown when data exists; nav only when multi-page */}
+      {effectivePagination && !loading && sorted.length > 0 && (
+        <div className="no-print" style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', borderTop:'1px solid #f0f4f8', flexWrap:'wrap', gap:8, flexShrink:0 }}>
 
           {/* Rows per page selector */}
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
@@ -266,31 +313,33 @@ export default function ReportTable({
             <span style={{ fontSize:12, color:'#888' }}>
               {rangeStart}–{rangeEnd} of {sorted.length}
             </span>
-            <div style={{ display:'flex', gap:4 }}>
-              <button onClick={() => setPage(0)} disabled={page === 0}
-                title="First page"
-                style={{ padding:'4px 8px', fontSize:12, fontWeight:600, border:'1px solid #dde9f5', borderRadius:5, background: page===0?'#f5f7fa':'#fff', color: page===0?'#aaa':'#1a3a6b', cursor: page===0?'not-allowed':'pointer' }}>
-                «
-              </button>
-              <button onClick={() => setPage(p => Math.max(0, p-1))} disabled={page === 0}
-                title="Previous page"
-                style={{ padding:'4px 10px', fontSize:12, fontWeight:600, border:'1px solid #dde9f5', borderRadius:5, background: page===0?'#f5f7fa':'#fff', color: page===0?'#aaa':'#1a3a6b', cursor: page===0?'not-allowed':'pointer' }}>
-                ‹ Prev
-              </button>
-              <span style={{ padding:'4px 10px', fontSize:12, color:'#555', border:'1px solid #dde9f5', borderRadius:5, background:'#f5f7fa' }}>
-                {page + 1} / {totalPages}
-              </span>
-              <button onClick={() => setPage(p => Math.min(totalPages-1, p+1))} disabled={page >= totalPages-1}
-                title="Next page"
-                style={{ padding:'4px 10px', fontSize:12, fontWeight:600, border:'1px solid #dde9f5', borderRadius:5, background: page>=totalPages-1?'#f5f7fa':'#fff', color: page>=totalPages-1?'#aaa':'#1a3a6b', cursor: page>=totalPages-1?'not-allowed':'pointer' }}>
-                Next ›
-              </button>
-              <button onClick={() => setPage(totalPages-1)} disabled={page >= totalPages-1}
-                title="Last page"
-                style={{ padding:'4px 8px', fontSize:12, fontWeight:600, border:'1px solid #dde9f5', borderRadius:5, background: page>=totalPages-1?'#f5f7fa':'#fff', color: page>=totalPages-1?'#aaa':'#1a3a6b', cursor: page>=totalPages-1?'not-allowed':'pointer' }}>
-                »
-              </button>
-            </div>
+            {totalPages > 1 && (
+              <div style={{ display:'flex', gap:4 }}>
+                <button onClick={() => setPage(0)} disabled={page === 0}
+                  title="First page"
+                  style={{ padding:'4px 8px', fontSize:12, fontWeight:600, border:'1px solid #dde9f5', borderRadius:5, background: page===0?'#f5f7fa':'#fff', color: page===0?'#aaa':'#1a3a6b', cursor: page===0?'not-allowed':'pointer' }}>
+                  «
+                </button>
+                <button onClick={() => setPage(p => Math.max(0, p-1))} disabled={page === 0}
+                  title="Previous page"
+                  style={{ padding:'4px 10px', fontSize:12, fontWeight:600, border:'1px solid #dde9f5', borderRadius:5, background: page===0?'#f5f7fa':'#fff', color: page===0?'#aaa':'#1a3a6b', cursor: page===0?'not-allowed':'pointer' }}>
+                  ‹ Prev
+                </button>
+                <span style={{ padding:'4px 10px', fontSize:12, color:'#555', border:'1px solid #dde9f5', borderRadius:5, background:'#f5f7fa' }}>
+                  {page + 1} / {totalPages}
+                </span>
+                <button onClick={() => setPage(p => Math.min(totalPages-1, p+1))} disabled={page >= totalPages-1}
+                  title="Next page"
+                  style={{ padding:'4px 10px', fontSize:12, fontWeight:600, border:'1px solid #dde9f5', borderRadius:5, background: page>=totalPages-1?'#f5f7fa':'#fff', color: page>=totalPages-1?'#aaa':'#1a3a6b', cursor: page>=totalPages-1?'not-allowed':'pointer' }}>
+                  Next ›
+                </button>
+                <button onClick={() => setPage(totalPages-1)} disabled={page >= totalPages-1}
+                  title="Last page"
+                  style={{ padding:'4px 8px', fontSize:12, fontWeight:600, border:'1px solid #dde9f5', borderRadius:5, background: page>=totalPages-1?'#f5f7fa':'#fff', color: page>=totalPages-1?'#aaa':'#1a3a6b', cursor: page>=totalPages-1?'not-allowed':'pointer' }}>
+                  »
+                </button>
+              </div>
+            )}
           </div>
 
         </div>

@@ -73,7 +73,7 @@ function FormField({ fieldDef, value, onChange, showToken, onToggleToken }) {
 }
 
 export default function SettingsModal({ settings, onSave, onClose, canClose }) {
-  const [form,           setForm]          = useState({ mccCustomerId:'', developerToken:'', oauthClientId:'', oauthClientSecret:'', refreshToken:'', claudeApiKey:'' })
+  const [form,           setForm]          = useState({ mccCustomerId:'', developerToken:'', oauthClientId:'', oauthClientSecret:'', refreshToken:'', claudeApiKey:'', merchantCenterId:'' })
   const [showToken,      setShowToken]     = useState(false)
   const [showClaudeKey,  setShowClaudeKey] = useState(false)
   const [saving,         setSaving]        = useState(false)
@@ -82,7 +82,7 @@ export default function SettingsModal({ settings, onSave, onClose, canClose }) {
   const [validationErr,  setValidationErr] = useState(null)
 
   useEffect(() => {
-    if (settings) setForm({ mccCustomerId: settings.mccCustomerId||'', developerToken: settings.developerToken||'', oauthClientId: settings.oauthClientId||'', oauthClientSecret: settings.oauthClientSecret||'', refreshToken: settings.refreshToken||'', claudeApiKey: settings.claudeApiKey||'' })
+    if (settings) setForm({ mccCustomerId: settings.mccCustomerId||'', developerToken: settings.developerToken||'', oauthClientId: settings.oauthClientId||'', oauthClientSecret: settings.oauthClientSecret||'', refreshToken: settings.refreshToken||'', claudeApiKey: settings.claudeApiKey||'', merchantCenterId: settings.merchantCenterId||'' })
   }, [settings])
 
   function handleChange(key, val) { setForm(f => ({ ...f, [key]: val })); setValidationErr(null); setTestError(null) }
@@ -162,6 +162,27 @@ export default function SettingsModal({ settings, onSave, onClose, canClose }) {
                 style={{ color:'#2563b0', textDecoration:'none', display:'inline-flex', alignItems:'center', gap:2 }}>
                 console.anthropic.com <ExternalLink size={10}/>
               </a>
+            </p>
+          </div>
+
+          {/* Campaign Manager divider */}
+          <div style={{ display:'flex', alignItems:'center', gap:8, margin:'4px 0' }}>
+            <div style={{ flex:1, height:1, background:'#dde9f5' }}/>
+            <span style={{ fontSize:11, color:'#888', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.5px', whiteSpace:'nowrap' }}>Campaign Manager (Optional)</span>
+            <div style={{ flex:1, height:1, background:'#dde9f5' }}/>
+          </div>
+
+          <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
+            <label style={{ fontSize:12, fontWeight:600, color:'#1a3a6b' }}>Merchant Center ID</label>
+            <input
+              type="text"
+              value={form.merchantCenterId}
+              onChange={e => handleChange('merchantCenterId', e.target.value)}
+              placeholder="e.g. 123456789"
+              style={{ height:36, padding:'0 12px', border:'1px solid #dde9f5', borderRadius:6, outline:'none', fontSize:13, color:'#1a3a6b', background:'#fff' }}
+            />
+            <p style={{ fontSize:11, color:'#888', margin:0 }}>
+              Required to create Shopping campaigns. Must already be linked to this Google Ads account in Merchant Center.
             </p>
           </div>
 

@@ -15,6 +15,68 @@ export const AD_GROUP_STATUS = {
   'ENABLED': 'Enabled', 'PAUSED': 'Paused', 'REMOVED': 'Removed',
 }
 
+// campaign.advertising_channel_type — Google Ads AdvertisingChannelTypeEnum
+export const ADVERTISING_CHANNEL_TYPE = {
+  2: 'Search', 3: 'Display', 4: 'Shopping', 5: 'Hotel', 6: 'Video',
+  7: 'Multi-channel', 8: 'Local', 9: 'Smart', 10: 'Performance Max',
+  11: 'Local Services', 13: 'Travel', 14: 'Demand Gen',
+  'SEARCH': 'Search', 'DISPLAY': 'Display', 'SHOPPING': 'Shopping', 'HOTEL': 'Hotel',
+  'VIDEO': 'Video', 'MULTI_CHANNEL': 'Multi-channel', 'LOCAL': 'Local', 'SMART': 'Smart',
+  'PERFORMANCE_MAX': 'Performance Max', 'LOCAL_SERVICES': 'Local Services',
+  'TRAVEL': 'Travel', 'DEMAND_GEN': 'Demand Gen',
+  'UNKNOWN': 'Unknown', 'UNSPECIFIED': 'Unspecified',
+}
+
+// campaign.advertising_channel_sub_type — Google Ads AdvertisingChannelSubTypeEnum
+export const ADVERTISING_CHANNEL_SUB_TYPE = {
+  2: 'Search Mobile App', 3: 'Display Mobile App', 4: 'Search Express', 5: 'Display Express',
+  6: 'Shopping Smart Ads', 7: 'Display Gmail Ad', 8: 'Display Smart Campaign',
+  10: 'Video Action', 11: 'Video Non-Skippable', 12: 'App Campaign',
+  13: 'App Campaign for Engagement', 14: 'Local Campaign',
+  15: 'Shopping Comparison Listing Ads', 16: 'Smart Campaign', 17: 'Video Sequence',
+  18: 'App Campaign for Pre-Registration', 19: 'Video Reach Target Frequency',
+  20: 'Travel Activities', 22: 'YouTube Audio',
+  'SEARCH_MOBILE_APP': 'Search Mobile App', 'DISPLAY_MOBILE_APP': 'Display Mobile App',
+  'SEARCH_EXPRESS': 'Search Express', 'DISPLAY_EXPRESS': 'Display Express',
+  'SHOPPING_SMART_ADS': 'Shopping Smart Ads', 'DISPLAY_GMAIL_AD': 'Display Gmail Ad',
+  'DISPLAY_SMART_CAMPAIGN': 'Display Smart Campaign', 'VIDEO_ACTION': 'Video Action',
+  'VIDEO_NON_SKIPPABLE': 'Video Non-Skippable', 'APP_CAMPAIGN': 'App Campaign',
+  'APP_CAMPAIGN_FOR_ENGAGEMENT': 'App Campaign for Engagement', 'LOCAL_CAMPAIGN': 'Local Campaign',
+  'SHOPPING_COMPARISON_LISTING_ADS': 'Shopping Comparison Listing Ads',
+  'SMART_CAMPAIGN': 'Smart Campaign', 'VIDEO_SEQUENCE': 'Video Sequence',
+  'APP_CAMPAIGN_FOR_PRE_REGISTRATION': 'App Campaign for Pre-Registration',
+  'VIDEO_REACH_TARGET_FREQUENCY': 'Video Reach Target Frequency',
+  'TRAVEL_ACTIVITIES': 'Travel Activities', 'YOUTUBE_AUDIO': 'YouTube Audio',
+  'UNKNOWN': 'Unknown', 'UNSPECIFIED': 'None',
+}
+
+// campaign.bidding_strategy_type — Google Ads BiddingStrategyTypeEnum
+export const BIDDING_STRATEGY_TYPE = {
+  2: 'Enhanced CPC', 3: 'Manual CPC', 4: 'Manual CPM', 5: 'Page One Promoted',
+  6: 'Target CPA', 7: 'Target Outrank Share', 8: 'Target ROAS', 9: 'Target Spend',
+  10: 'Maximize Conversions', 11: 'Maximize Conversion Value', 12: 'Percent CPC',
+  13: 'Manual CPV', 14: 'Target CPM', 15: 'Target Impression Share', 16: 'Commission',
+  18: 'Manual CPA', 19: 'Fixed CPM', 20: 'Target CPV', 21: 'Target CPC',
+  22: 'Fixed Share of Voice',
+  'ENHANCED_CPC': 'Enhanced CPC', 'MANUAL_CPC': 'Manual CPC', 'MANUAL_CPM': 'Manual CPM',
+  'PAGE_ONE_PROMOTED': 'Page One Promoted', 'TARGET_CPA': 'Target CPA',
+  'TARGET_OUTRANK_SHARE': 'Target Outrank Share', 'TARGET_ROAS': 'Target ROAS',
+  'TARGET_SPEND': 'Target Spend', 'MAXIMIZE_CONVERSIONS': 'Maximize Conversions',
+  'MAXIMIZE_CONVERSION_VALUE': 'Maximize Conversion Value', 'PERCENT_CPC': 'Percent CPC',
+  'MANUAL_CPV': 'Manual CPV', 'TARGET_CPM': 'Target CPM',
+  'TARGET_IMPRESSION_SHARE': 'Target Impression Share', 'COMMISSION': 'Commission',
+  'MANUAL_CPA': 'Manual CPA', 'FIXED_CPM': 'Fixed CPM', 'TARGET_CPV': 'Target CPV',
+  'TARGET_CPC': 'Target CPC', 'FIXED_SHARE_OF_VOICE': 'Fixed Share of Voice',
+  'UNKNOWN': 'Unknown', 'UNSPECIFIED': 'Not set', 'INVALID': 'Invalid',
+}
+
+// campaign_budget.delivery_method — Google Ads BudgetDeliveryMethodEnum
+export const BUDGET_DELIVERY_METHOD = {
+  2: 'Standard', 3: 'Accelerated',
+  'STANDARD': 'Standard', 'ACCELERATED': 'Accelerated',
+  'UNKNOWN': 'Unknown', 'UNSPECIFIED': 'Unspecified',
+}
+
 export const AD_TYPE = {
   2:  'Text Ad',
   3:  'Expanded Text Ad',
@@ -248,6 +310,20 @@ export const MATCH_TYPE = {
   'UNKNOWN': 'Unknown',
 }
 
+export const SEARCH_TERM_STATUS = {
+  1: 'Unknown',
+  2: 'Added',
+  3: 'Excluded',
+  4: 'Added Excluded',
+  5: 'Near',
+  'ADDED':          'Added',
+  'EXCLUDED':       'Excluded',
+  'ADDED_EXCLUDED': 'Added Excluded',
+  'NEAR':           'Near',
+  'UNKNOWN':        'Unknown',
+  'UNSPECIFIED':    'Unknown',
+}
+
 export const APPROVAL_STATUS = {
   1: 'Approved',
   2: 'Approved Limited',
@@ -300,9 +376,9 @@ export const CALL_TYPE = {
 }
 
 export const CALL_TRACKING_CONDITION = {
-  1: 'Unknown',  2: 'Ad',  3: 'Landing Page',  4: 'Website Wrapper',  5: 'Unknown',
+  1: 'Unknown',  2: 'Ad',  3: 'Website',  4: 'Website Wrapper',  5: 'Unknown',
   'AD':              'Ad',
-  'LANDING_PAGE':    'Landing Page',
+  'LANDING_PAGE':    'Website',
   'WEBSITE_WRAPPER': 'Website Wrapper',
   'UNKNOWN':         'Unknown',
 }

@@ -1,15 +1,26 @@
 import React, { useState } from 'react'
-import { LayoutDashboard, BarChart2, Tag, ShieldCheck, Settings, AlertCircle, ChevronDown } from 'lucide-react'
+import { LayoutDashboard, BarChart2, Tag, ShieldCheck, Settings, AlertCircle, ChevronDown, ChevronLeft, Wand2, Layers, Rocket, Users, KeyRound, Building2 } from 'lucide-react'
 
 // Import local logo — Vite hashes it and copies to dist/assets automatically
 import logoAsset from '../assets/logo-white.webp'
 const LOGO_URL = logoAsset
 
-const NAV = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/'         },
-  { icon: BarChart2,       label: 'Reports',   path: '/reports'  },
-  { icon: Tag,             label: 'Keywords',  path: '/keywords' },
-  { icon: ShieldCheck,     label: 'Audit',     path: '/audit'    },
+const NAV_GROUPS = [
+  [
+    { icon: LayoutDashboard, label: 'Dashboard',     path: '/'                },
+    { icon: BarChart2,       label: 'Reports',       path: '/reports'         },
+    { icon: Tag,             label: 'Keywords',      path: '/keywords'        },
+    { icon: ShieldCheck,     label: 'Audit',         path: '/audit'           },
+  ],
+  [
+    { icon: Rocket,          label: 'Campaign Manager', path: '/campaign-manager' },
+    { icon: Users,           label: 'Ad/Asset Group Manager', path: '/ad-group-manager' },
+    { icon: KeyRound,        label: 'Keywords Manager', path: '/keywords-manager' },
+  ],
+  [
+    { icon: Wand2,           label: 'AI RSA Builder',      path: '/ai-rsa-builder'       },
+    { icon: Layers,          label: 'AI Assets Builder', path: '/ai-sitelinks-builder' },
+  ],
 ]
 
 function Logo({ width = 160 }) {
@@ -82,7 +93,7 @@ function AccountSkeleton() {
   )
 }
 
-export default function Sidebar({ accounts, selectedAccount, onSelectAccount, onOpenSettings, hasCredentials, loading, error, activePath, onNavigate }) {
+export default function Sidebar({ accounts, selectedAccount, onSelectAccount, onOpenSettings, onOpenBusinessProfile, hasCredentials, loading, error, activePath, onNavigate, onToggleSidebar }) {
   const [accountsOpen, setAccountsOpen] = useState(false)
 
   function handleSelectAccount(acct) {
@@ -91,15 +102,37 @@ export default function Sidebar({ accounts, selectedAccount, onSelectAccount, on
   }
 
   return (
-    <div style={{ width:240, flexShrink:0, background:'#1a3a6b', display:'flex', flexDirection:'column', height:'100vh', overflow:'hidden' }}>
-      <div style={{ padding:'16px 12px', borderBottom:'1px solid #2563b0', flexShrink:0, textAlign:'center' }}>
+    <div className="app-sidebar" style={{ width:240, flexShrink:0, background:'#1a3a6b', display:'flex', flexDirection:'column', height:'100vh', overflow:'hidden' }}>
+      <div style={{ padding:'16px 12px', borderBottom:'1px solid #2563b0', flexShrink:0, textAlign:'center', position:'relative' }}>
+        {onToggleSidebar && (
+          <button
+            onClick={onToggleSidebar}
+            title="Hide sidebar"
+            style={{
+              position:'absolute', top:10, right:8, width:22, height:22, borderRadius:6,
+              border:'1px solid rgba(255,255,255,0.2)', background:'rgba(255,255,255,0.07)',
+              display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', padding:0,
+              color:'rgba(255,255,255,0.7)',
+            }}
+          >
+            <ChevronLeft size={13} />
+          </button>
+        )}
         <Logo width={160} />
         <div style={{ marginTop:8, fontSize:15, fontWeight:700, color:'#ffffff', lineHeight:1.1 }}>GAds Dashboard</div>
         <div style={{ fontSize:11, color:'#3a8fd1', marginTop:2 }}>Top Ten Website Marketing</div>
       </div>
 
       <div style={{ flexShrink:0, padding:'8px 0', borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
-        {NAV.map(item => <NavItem key={item.path} {...item} activePath={activePath} onNavigate={onNavigate} />)}
+        {NAV_GROUPS.map((group, gi) => (
+          <div key={gi} style={{
+            padding: '4px 0',
+            borderTop: gi > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+            marginTop: gi > 0 ? 4 : 0,
+          }}>
+            {group.map(item => <NavItem key={item.path} {...item} activePath={activePath} onNavigate={onNavigate} />)}
+          </div>
+        ))}
       </div>
 
       {/* Account dropdown */}
@@ -146,7 +179,21 @@ export default function Sidebar({ accounts, selectedAccount, onSelectAccount, on
 
       <div style={{ flex:1 }} />
 
-      <div style={{ flexShrink:0, padding:'12px 16px', borderTop:'1px solid rgba(255,255,255,0.1)' }}>
+      <div style={{ flexShrink:0, padding:'12px 16px', borderTop:'1px solid rgba(255,255,255,0.1)', display:'flex', flexDirection:'column', gap:8 }}>
+        {onOpenBusinessProfile && (
+          <button onClick={onOpenBusinessProfile} disabled={!selectedAccount} title={!selectedAccount ? 'Select an account first' : 'Edit this account\'s business profile'} style={{
+            width:'100%', display:'flex', alignItems:'center', gap:10,
+            padding:'9px 12px', borderRadius:6, color: selectedAccount ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.3)', fontSize:13, fontWeight:500,
+            background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.1)', transition:'background 0.15s',
+            cursor: selectedAccount ? 'pointer' : 'default',
+          }}
+            onMouseEnter={e => { if (selectedAccount) e.currentTarget.style.background='rgba(255,255,255,0.13)' }}
+            onMouseLeave={e => { e.currentTarget.style.background='rgba(255,255,255,0.07)' }}
+          >
+            <Building2 size={15} />
+            <span style={{ flex:1, textAlign:'left' }}>Business Profile</span>
+          </button>
+        )}
         <button onClick={onOpenSettings} style={{
           width:'100%', display:'flex', alignItems:'center', gap:10,
           padding:'9px 12px', borderRadius:6, color:'rgba(255,255,255,0.7)', fontSize:13, fontWeight:500,

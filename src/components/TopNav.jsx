@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { RefreshCw, ChevronDown, Calendar } from 'lucide-react'
+import { RefreshCw, ChevronDown, ChevronRight, Calendar, ZoomIn, ZoomOut } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import dayjs from 'dayjs'
@@ -162,11 +162,73 @@ function DateDropdown({ dateRange, onChange }) {
 
 // ── Main TopNav ───────────────────────────────────────────────────────────────
 
+const FONT_MIN = 80
+const FONT_MAX = 130
+const FONT_STEP = 5
+
+function FontSizeControl({ fontScale, onChange }) {
+  const canDecrease = fontScale > FONT_MIN
+  const canIncrease = fontScale < FONT_MAX
+
+  const btnStyle = (enabled) => ({
+    width:28, height:28, display:'flex', alignItems:'center', justifyContent:'center',
+    background: enabled ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)',
+    border:'1px solid rgba(255,255,255,0.2)', borderRadius:6,
+    color: enabled ? '#fff' : 'rgba(255,255,255,0.3)',
+    cursor: enabled ? 'pointer' : 'not-allowed',
+    flexShrink:0,
+  })
+
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:3 }}>
+      <button
+        title="Decrease font size"
+        disabled={!canDecrease}
+        onClick={() => canDecrease && onChange(fontScale - FONT_STEP)}
+        style={btnStyle(canDecrease)}
+        onMouseEnter={e => { if (canDecrease) e.currentTarget.style.background='rgba(255,255,255,0.2)' }}
+        onMouseLeave={e => { e.currentTarget.style.background = canDecrease ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)' }}
+      >
+        <ZoomOut size={13} />
+      </button>
+
+      <button
+        title="Reset font size"
+        onClick={() => onChange(100)}
+        style={{
+          padding:'0 7px', height:28, background:'rgba(255,255,255,0.1)',
+          border:'1px solid rgba(255,255,255,0.2)', borderRadius:6,
+          color: fontScale === 100 ? 'rgba(255,255,255,0.6)' : '#fff',
+          fontSize:11, fontWeight:600, cursor:'pointer', flexShrink:0,
+          fontVariantNumeric:'tabular-nums',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background='rgba(255,255,255,0.2)' }}
+        onMouseLeave={e => { e.currentTarget.style.background='rgba(255,255,255,0.1)' }}
+      >
+        {fontScale}%
+      </button>
+
+      <button
+        title="Increase font size"
+        disabled={!canIncrease}
+        onClick={() => canIncrease && onChange(fontScale + FONT_STEP)}
+        style={btnStyle(canIncrease)}
+        onMouseEnter={e => { if (canIncrease) e.currentTarget.style.background='rgba(255,255,255,0.2)' }}
+        onMouseLeave={e => { e.currentTarget.style.background = canIncrease ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)' }}
+      >
+        <ZoomIn size={13} />
+      </button>
+    </div>
+  )
+}
+
 export default function TopNav({
   selectedAccount, dateRange, onDateRangeChange,
   onRefresh, refreshing, lastRefreshed,
   hidePaused, onHidePausedChange,
+  fontScale, onFontScaleChange,
   activePath,
+  sidebarCollapsed, onToggleSidebar,
 }) {
   const [showTooltip, setShowTooltip] = useState(false)
   const refreshLabel = lastRefreshed ? `Last refreshed ${dayjs(lastRefreshed).fromNow()}` : 'Click to refresh'
@@ -178,15 +240,31 @@ export default function TopNav({
       display:'flex', alignItems:'center', justifyContent:'space-between',
       padding:'0 24px', borderBottom:'1px solid rgba(255,255,255,0.1)',
     }}>
-      <div>
-        {selectedAccount ? (
-          <>
-            <div style={{ color:'#ffffff', fontWeight:700, fontSize:14, lineHeight:1.2 }}>{selectedAccount.name}</div>
-            <div style={{ color:'#3a8fd1', fontSize:11, marginTop:1 }}>ID: {selectedAccount.id} · {selectedAccount.currencyCode}</div>
-          </>
-        ) : (
-          <div style={{ color:'rgba(255,255,255,0.4)', fontSize:13 }}>No account selected</div>
+      <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+        {sidebarCollapsed && (
+          <button
+            onClick={onToggleSidebar}
+            title="Show sidebar"
+            style={{
+              flexShrink:0, width:26, height:26, borderRadius:6,
+              border:'1px solid rgba(255,255,255,0.2)', background:'rgba(255,255,255,0.07)',
+              display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', padding:0,
+              color:'#ffffff',
+            }}
+          >
+            <ChevronRight size={14} />
+          </button>
         )}
+        <div>
+          {selectedAccount ? (
+            <>
+              <div style={{ color:'#ffffff', fontWeight:700, fontSize:14, lineHeight:1.2 }}>{selectedAccount.name}</div>
+              <div style={{ color:'#3a8fd1', fontSize:11, marginTop:1 }}>ID: {selectedAccount.id} · {selectedAccount.currencyCode}</div>
+            </>
+          ) : (
+            <div style={{ color:'rgba(255,255,255,0.4)', fontSize:13 }}>No account selected</div>
+          )}
+        </div>
       </div>
 
       <div style={{ display:'flex', alignItems:'center', gap:14 }}>
@@ -197,6 +275,11 @@ export default function TopNav({
             <div style={{ width:1, height:20, background:'rgba(255,255,255,0.2)' }} />
           </>
         )}
+
+        {/* Font size control */}
+        <FontSizeControl fontScale={fontScale ?? 100} onChange={onFontScaleChange} />
+
+        <div style={{ width:1, height:20, background:'rgba(255,255,255,0.2)' }} />
 
         <DateDropdown dateRange={dateRange} onChange={onDateRangeChange} />
 
